@@ -80,6 +80,21 @@ class Chromosome:
         length = len(word)
         count = 0
 
+        # horizontal
+        if 'h' in dirs:
+            for i in range(begin, end+1):
+                x = i % SIZE
+                y = i / SIZE
+                c = 0
+                for j in range(length):
+                    if x+j >= SIZE:
+                        break
+
+                    at = y*SIZE + (x+j)
+                    if self.matrix[at] == word[j]:
+                        c += 1
+                count = max(count, c)
+
         # vertical
         if 'v' in dirs:
             for i in range(begin, end+1):
@@ -94,20 +109,6 @@ class Chromosome:
                     if self.matrix[at] == word[j]:
                         c += 1
                 count = max(count, c)
-
-        # horizontal
-        for i in range(begin, end+1):
-            x = i % SIZE
-            y = i / SIZE
-            c = 0
-            for j in range(length):
-                if x+j >= SIZE:
-                    break
-
-                at = y*SIZE + (x+j)
-                if self.matrix[at] == word[j]:
-                    c += 1
-            count = max(count, c)
 
         # diagonal
         if 'd' in dirs:
@@ -200,12 +201,20 @@ if __name__ == "__main__":
     pool, total_value = GenerateChromosomes(NUM_POOL)
     parents, _ = GenerateChromosomes(NUM_PARENTS)
 
+    best_score = sum(map(len, WORDS))
     i = 0
     while True:
         SelectParents(pool, parents, total_value)
         total_value = GenerateOffspring(pool, parents)
+
         if i % 5 == 0:
             print "\n[{}] fitness: {}".format(i, parents[0].value)
             print parents[0]
+
+        if parents[0].value == best_score:
+            print "\n[{}] found!".format(i)
+            print parents[0]
+            break
+
         i += 1
 
