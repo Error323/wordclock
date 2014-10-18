@@ -2,6 +2,7 @@
 
 import random
 import time
+import sys
 
 NUM_POOL      = 500   # Size of the chromosome pool
 NUM_PARENTS   = 15    # Parents that will mate
@@ -226,6 +227,7 @@ if __name__ == "__main__":
             v = parents[0].value
             print "\n[{}] {} {} {:0.1f} p/s".format(i, v, max_score-v, mps)
             print parents[0]
+            sys.stdout.flush()
 
         if parents[0].value == max_score:
             print "\n[{}] found!".format(i)
