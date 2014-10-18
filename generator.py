@@ -14,9 +14,9 @@ WORDS = ["TWAALF", "EEN", "TWEE",  "DRIE", "VIER", "VIJF",   "ZES", "ZEVEN",
 
 # Tuples ([words], [valid directions], [start, stop])
 ORDER = [([5,10,15],                   ['h',],        [0,  15]), 
-         ([13, 14],                    ['h',],        [15, 24]), 
-         ([16,],                       ['h',],        [24, 29]), 
-         ([0,1,2,3,4,5,6,7,8,9,10,11], ['h','v','d'], [30, 95]),
+         ([13, 14],                    ['h',],        [15, 25]), 
+         ([16,],                       ['h',],        [23, 29]), 
+         ([0,1,2,3,4,5,6,7,8,9,10,11], ['h','v','d'], [29, 96]),
          ([12,],                       ['h',],        [96, 99]),
          ([17,18],                     ['h','v','d'], [0,  99])]
 
@@ -50,7 +50,7 @@ class Chromosome:
 
                 # Horizontal
                 if d == 'h':
-                    at = random.randint(T[2][0], T[2][1]-l)
+                    at = random.randint(T[2][0], T[2][1]-l+1)
                     self.matrix[at:at+l] = w
 
                 # Vertical
@@ -198,23 +198,24 @@ def GenerateChromosomes(N):
             
 
 if __name__ == "__main__":
-    pool, total_value = GenerateChromosomes(NUM_POOL)
-    parents, _ = GenerateChromosomes(NUM_PARENTS)
-
-    best_score = sum(map(len, WORDS))
+    max_score = 0
+    for T in ORDER:
+        max_score += sum(map(len, [WORDS[i] for i in T[0]]))
+    c = Chromosome()
+    best = Chromosome()
     i = 0
     while True:
-        SelectParents(pool, parents, total_value)
-        total_value = GenerateOffspring(pool, parents)
-
-        if i % 5 == 0:
-            print "\n[{}] fitness: {}".format(i, parents[0].value)
-            print parents[0]
-
-        if parents[0].value == best_score:
+        if best.value == max_score:
             print "\n[{}] found!".format(i)
-            print parents[0]
+            print best
             break
+
+        c.random()
+        c.value = c.fitness()
+        if c.value > best.value:
+          best.copyfrom(c)
+          print "\n[{}] fitness: {}".format(i, best.value)
+          print best
 
         i += 1
 
