@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import random
+import time
 
 NUM_POOL      = 500   # Size of the chromosome pool
 NUM_PARENTS   = 15    # Parents that will mate
@@ -147,26 +148,32 @@ def GenerateOffspring(pool, parents):
     best = parents[0]
     bestval = parents[0].value
     pool[0].copyfrom(parents[0])
+
     for child in pool[1:]:
         p1 = random.choice(parents)
         p2 = random.choice(parents)
+
         crossover = random.randint(0, SIZE*SIZE-1)
         for i in range(crossover):
             if random.random() < MUTATION_RATE:
                 child.matrix[i] = random.choice(UNIQUE)
             else:
                 child.matrix[i] = p1.matrix[i]
+
         for i in range(crossover+1, SIZE*SIZE):
             if random.random() < MUTATION_RATE:
                 child.matrix[i] = random.choice(UNIQUE)
             else:
                 child.matrix[i] = p2.matrix[i]
+
         child.value = child.fitness()
         if child.value > bestval:
             best = child
             bestval = child.value
+
         total += child.value
     parents[0].copyfrom(best)
+
     return total
             
 
@@ -198,24 +205,32 @@ def GenerateChromosomes(N):
             
 
 if __name__ == "__main__":
+    pool, total_value = GenerateChromosomes(NUM_POOL)
+    parents, _ = GenerateChromosomes(NUM_PARENTS)
+
     max_score = 0
     for T in ORDER:
         max_score += sum(map(len, [WORDS[i] for i in T[0]]))
-    c = Chromosome()
-    best = Chromosome()
-    i = 0
-    while True:
-        if best.value == max_score:
-            print "\n[{}] found!".format(i)
-            print best
-            break
 
-        c.random()
-        c.value = c.fitness()
-        if c.value > best.value:
-          best.copyfrom(c)
-          print "\n[{}] fitness: {}".format(i, best.value)
-          print best
+    i = 0
+    t = time.time()
+    while True:
+        SelectParents(pool, parents, total_value)
+        total_value = GenerateOffspring(pool, parents)
+
+        if i % 5 == 0 and i > 0:
+            tnow = time.time()
+            mps = NUM_POOL / (tnow - t)
+            mps *= 5.0
+            t = tnow
+            v = parents[0].value
+            print "\n[{}] {} {} {:0.1f} p/s".format(i, v, max_score-v, mps)
+            print parents[0]
+
+        if parents[0].value == max_score:
+            print "\n[{}] found!".format(i)
+            print parents[0]
+            break
 
         i += 1
 
