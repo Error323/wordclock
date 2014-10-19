@@ -20,7 +20,7 @@
 #define LED_PIN   6 // Matrix led pin
 #define WIDTH    10 // Matrix board width
 #define HEIGHT   10 // Matrix board height
-#define FPS      40 // Frames per second to achive
+#define FPS      40 // Frames per second to achieve
 
 /* Macros */
 #define Activate(x) activated |= x
@@ -37,7 +37,7 @@ Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(WIDTH * HEIGHT, LED_PIN);
 /** @brief the realtime clock */
 RTC_DS3231 rtc;
 
-/** @brief convert time to list of wordmasks */
+/** @brief convert time to wordsmask */
 uint32_t time2words(const DateTime &time)
 {
   uint32_t activated = 0ul;
