@@ -18,7 +18,7 @@ WORDS = ["TWAALF", "EEN", "TWEE",  "DRIE", "VIER", "VIJF",   "ZES", "ZEVEN",
 ORDER = [([5,10,15],                   ['h',],        [0,  15]), 
          ([13, 14],                    ['h',],        [15, 25]), 
          ([16,],                       ['h',],        [23, 29]), 
-         ([0,1,2,3,4,5,6,7,8,9,10,11], ['h','v','d'], [29, 96]),
+         ([0,1,2,3,4,5,6,7,8,9,10,11], ['h','v','d'], [30, 96]),
          ([12,],                       ['h',],        [97, 99]),
          ([17,18,19],                  ['h','v','d'], [0,  99])]
 
@@ -225,7 +225,7 @@ if __name__ == "__main__":
             mps = NUM_POOL / (tnow - t)
             mps *= 5.0
             t = tnow
-            print "\n[{}] {} {}/{} {:0.1f}p/s".format(i, best.value,
+            print "\n[{}] {} {}/{} {:0.1f} mp/s".format(i, best.value,
                                                       best.count, max_score,
                                                       mps)
             print best
