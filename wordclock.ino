@@ -23,7 +23,7 @@
 #define FPS      40 // Frames per second to achive
 
 /* Macros */
-#define Activate(x) active[i++] = x
+#define Activate(x) activated |= x
 
 /* Birthdays */
 DateTime puck     = DateTime(2014, 3, 3);
@@ -37,12 +37,11 @@ Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(WIDTH * HEIGHT, LED_PIN);
 /** @brief the realtime clock */
 RTC_DS3231 rtc;
 
-/** @brief the word masks currently activated, max 5 */
-uint32_t activated[5];
-
 /** @brief convert time to list of wordmasks */
-uint8_t time2words(const DateTime &time, uint32_t active[])
+uint32_t time2words(const DateTime &time)
 {
+  uint32_t activated = 0;
+  
   uint8_t h = time.hour() % 12;
   uint8_t m = (time.minute() + 2) / 5;
   uint8_t i = 0;
@@ -103,20 +102,19 @@ void loop()
 {
   uint32_t ms = millis();
   DateTime time = rtc.now();
-  uint8_t num_words = time2words(time, activated);
+  uint32_t activated = time2words(time);
   
   for (uint8_t i = 0; i < WIDTH*HEIGHT; i++)
   {
-    led_matrix.setPixelColor(i, 0);
-    for (uint8_t j = 0; j < num_words; j++)
+    if (matrix[i]&activated)
     {
-      if (matrix[i]&activated[j] == activated[j])
-      {
-        led_matrix.setPixelColor(i, 255, 0, 0);
-        break;
-      }
+      led_matrix.setPixelColor(i, 255, 0, 0);
+      break;
     }
+    else
+      led_matrix.setPixelColor(i, 0);
   }
+  
   led_matrix.show();
   
   int32_t waittime = (1000/FPS) - (millis() - ms);
