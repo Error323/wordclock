@@ -1,6 +1,19 @@
 #!/usr/bin/python
 
 from generator import *
+import argparse
+
+def get_configuration():
+    """Returns a populated configuration"""
+    parser = argparse.ArgumentParser(
+      description="Create matrix header file for wordclock"
+    )
+    parser.add_argument("--matrix", "-m",
+      help="{0}x{0} matrix in column major".format(SIZE),
+      default="JKWARTIEN.AVIJFMVOORNOVERAHALFJ.T.DRIEVNETWAALFPIELAEZ.O.UJGLCEEEENCFEEH.V.S.K.N.TIENVIER.ELFN...UUR")
+
+    return parser.parse_args()
+
 
 def find(word, matrix):
     length = len(word)
@@ -66,8 +79,9 @@ def mat2str(M):
 
 
 if __name__ == "__main__":
+    config = get_configuration()
     alphabet = [chr(i+65) for i in range(26)]
-    matrix = "JKWARTIEN.AVIJFMVOORNOVERAHALFJ.T.DRIEVNETWAALFPIELAEZ.O.UJGLCEEEENCFEEH.V.S.K.N.TIENVIER.ELFN...UUR"
+    matrix = config.matrix
     full = [' '] * SIZE*SIZE
     for i,c in enumerate(matrix):
         if c == '.':
@@ -89,9 +103,9 @@ if __name__ == "__main__":
     for i, w in enumerate(W):
         K[w] = 1 << i
         if i > 3 and w in ["VIJF","TIEN"]:
-            print "#define %s_%s (1 << %i)" % (w, ' ' * (len(m)-len(w)) ,i)
+            print "#define %s_%s (1ul << %i)" % (w, ' ' * (len(m)-len(w)) ,i)
         else:
-            print "#define %s %s (1 << %i)" % (w, ' ' * (len(m)-len(w)) ,i)
+            print "#define %s %s (1ul << %i)" % (w, ' ' * (len(m)-len(w)) ,i)
 
     output = [0] * SIZE*SIZE
     for w in W:

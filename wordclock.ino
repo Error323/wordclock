@@ -40,7 +40,7 @@ RTC_DS3231 rtc;
 /** @brief convert time to list of wordmasks */
 uint32_t time2words(const DateTime &time)
 {
-  uint32_t activated = 0;
+  uint32_t activated = 0ul;
   
   uint8_t h = time.hour() % 12;
   uint8_t m = (time.minute() + 2) / 5;
