@@ -11,28 +11,28 @@
  * E L F N Q C I U U R 
  */
 
-#define VIJF      (1 << 0)
-#define TIEN      (1 << 1)
-#define KWART     (1 << 2)
-#define VOOR      (1 << 3)
-#define OVER      (1 << 4)
-#define HALF      (1 << 5)
-#define TWAALF    (1 << 6)
-#define EEN       (1 << 7)
-#define TWEE      (1 << 8)
-#define DRIE      (1 << 9)
-#define VIER      (1 << 10)
-#define VIJF_     (1 << 11)
-#define ZES       (1 << 12)
-#define ZEVEN     (1 << 13)
-#define ACHT      (1 << 14)
-#define NEGEN     (1 << 15)
-#define TIEN_     (1 << 16)
-#define ELF       (1 << 17)
-#define UUR       (1 << 18)
-#define JANJELLE  (1 << 19)
-#define MARLOES   (1 << 20)
-#define PUCK      (1 << 21)
+static const uint32_t VIJF     = (1ul << 0);
+static const uint32_t TIEN     = (1ul << 1);
+static const uint32_t KWART    = (1ul << 2);
+static const uint32_t VOOR     = (1ul << 3);
+static const uint32_t OVER     = (1ul << 4);
+static const uint32_t HALF     = (1ul << 5);
+static const uint32_t TWAALF   = (1ul << 6);
+static const uint32_t EEN      = (1ul << 7);
+static const uint32_t TWEE     = (1ul << 8);
+static const uint32_t DRIE     = (1ul << 9);
+static const uint32_t VIER     = (1ul << 10);
+static const uint32_t VIJF_    = (1ul << 11);
+static const uint32_t ZES      = (1ul << 12);
+static const uint32_t ZEVEN    = (1ul << 13);
+static const uint32_t ACHT     = (1ul << 14);
+static const uint32_t NEGEN    = (1ul << 15);
+static const uint32_t TIEN_    = (1ul << 16);
+static const uint32_t ELF      = (1ul << 17);
+static const uint32_t UUR      = (1ul << 18);
+static const uint32_t JANJELLE = (1ul << 19);
+static const uint32_t MARLOES  = (1ul << 20);
+static const uint32_t PUCK     = (1ul << 21);
 
 static const uint32_t hours[] = { TWAALF, EEN,   TWEE, DRIE,  VIER,  VIJF_,
                                   ZES,    ZEVEN, ACHT, NEGEN, TIEN_, ELF };

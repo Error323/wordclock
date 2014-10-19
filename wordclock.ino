@@ -44,7 +44,6 @@ uint32_t time2words(const DateTime &time)
   
   uint8_t h = time.hour() % 12;
   uint8_t m = (time.minute() + 2) / 5;
-  uint8_t i = 0;
 
   switch (m)
   {
@@ -79,7 +78,7 @@ uint32_t time2words(const DateTime &time)
   if (time.month() == janjelle.month() && time.year() == janjelle.year())
     Activate(JANJELLE);
 
-  return i;
+  return activated;
 }
 
 void setup()
@@ -107,10 +106,7 @@ void loop()
   for (uint8_t i = 0; i < WIDTH*HEIGHT; i++)
   {
     if (matrix[i]&activated)
-    {
       led_matrix.setPixelColor(i, 255, 0, 0);
-      break;
-    }
     else
       led_matrix.setPixelColor(i, 0);
   }
