@@ -1,0 +1,55 @@
+/**
+ * J K W A R T I E N X 
+ * A V I J F M V O O R 
+ * N O V E R A H A L F 
+ * J H T H D R I E V N 
+ * E T W A A L F P I E 
+ * L A E Z Z O Y U J G 
+ * L C E E E E N C F E 
+ * E H Q V Z S D K S N 
+ * C T I E N V I E R M 
+ * E L F N Q C I U U R 
+ */
+
+#define VIJF      (1 << 0)
+#define TIEN      (1 << 1)
+#define KWART     (1 << 2)
+#define VOOR      (1 << 3)
+#define OVER      (1 << 4)
+#define HALF      (1 << 5)
+#define TWAALF    (1 << 6)
+#define EEN       (1 << 7)
+#define TWEE      (1 << 8)
+#define DRIE      (1 << 9)
+#define VIER      (1 << 10)
+#define VIJF_     (1 << 11)
+#define ZES       (1 << 12)
+#define ZEVEN     (1 << 13)
+#define ACHT      (1 << 14)
+#define NEGEN     (1 << 15)
+#define TIEN_     (1 << 16)
+#define ELF       (1 << 17)
+#define UUR       (1 << 18)
+#define JANJELLE  (1 << 19)
+#define MARLOES   (1 << 20)
+#define PUCK      (1 << 21)
+
+static const uint32_t hours[] = { TWAALF, EEN,   TWEE, DRIE,  VIER,  VIJF_,
+                                  ZES,    ZEVEN, ACHT, NEGEN, TIEN_, ELF };
+
+static const uint32_t matrix[] = {
+  0x80000, 0x4,      0x4,     0x4,      0x4,     0x10004,  0x10000, 0x10000,
+  0x10000, 0x0,      0x80000, 0x800,    0x800,   0x800,    0x800,   0x100000,
+  0x8,     0x8,      0x8,     0x8,      0x80000, 0x10,     0x10,    0x10,
+  0x10,    0x100000, 0x20,    0x20,     0x20,    0x20,     0x80000, 0x0,
+  0x100,   0x0,      0x200,   0x100200, 0x200,   0x200,    0x0,     0x8000,
+  0x80000, 0x40,     0x140,   0x40,     0x40,    0x100040, 0x40,    0x200000,
+  0x0,     0x8000,   0x80000, 0x4000,   0x100,   0x3000,   0x0,     0x100000,
+  0x0,     0x200000, 0x0,     0x8000,   0x80000, 0x4000,   0x100,   0x2000,
+  0x1080,  0x100080, 0x80,    0x200000, 0x0,     0x8000,   0x80000, 0x4000,
+  0x0,     0x2000,   0x0,     0x101000, 0x0,     0x200000, 0x0,     0x8000,
+  0x0,     0x4000,   0x0,     0x2000,   0x0,     0x400,    0x400,   0x400,
+  0x400,   0x0,      0x20000, 0x20000,  0x20000, 0x2000,   0x0,     0x0,
+  0x0,     0x40000,  0x40000, 0x40000
+};
+
