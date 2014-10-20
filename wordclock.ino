@@ -71,11 +71,11 @@ uint32_t time2words(const DateTime &time)
     Activate(UUR);
 
   // check birthdays
-  if (time.month() == puck.month() && time.year() == puck.year())
+  if (time.month() == puck.month() && time.day() == puck.day())
     Activate(PUCK);
-  if (time.month() == marloes.month() && time.year() == marloes.year())
+  if (time.month() == marloes.month() && time.day() == marloes.day())
     Activate(MARLOES);
-  if (time.month() == janjelle.month() && time.year() == janjelle.year())
+  if (time.month() == janjelle.month() && time.day() == janjelle.day())
     Activate(JANJELLE);
 
   return activated;
