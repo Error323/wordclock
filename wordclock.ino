@@ -11,7 +11,7 @@
 #include <RTC_DS3231.h>
 #include <Adafruit_NeoPixel.h>
 
-#include "matrix.h"
+#include "Matrix.h"
 
 /* Settings */
 #define LIGHT_PIN 5 // Light sensor pin

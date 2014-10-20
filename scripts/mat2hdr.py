@@ -67,7 +67,7 @@ def find(word, matrix):
         if len(indices) == length:
             return indices
 
-    raise ValueError("No indices found")
+    raise ValueError("No indices found for {}".format(word))
 
 def mat2str(M):
     s = " * "
@@ -80,6 +80,7 @@ def mat2str(M):
 
 if __name__ == "__main__":
     config = get_configuration()
+    print mat2str(config.matrix)
     alphabet = [chr(i+65) for i in range(26)]
     matrix = config.matrix
     full = [' '] * SIZE*SIZE
