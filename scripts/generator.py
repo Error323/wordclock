@@ -4,10 +4,10 @@ import random
 import time
 import sys
 
-NUM_POOL      = 500   # Size of the chromosome pool
-NUM_PARENTS   = 15    # Parents that will mate
-NUM_RANDOM    = 3     # Random parents
-MUTATION_RATE = 0.01  # Mutation probability per chromosome
+NUM_POOL      = 1000   # Size of the chromosome pool
+NUM_PARENTS   = 15     # Parents that will mate
+NUM_RANDOM    = 3      # Random parents
+MUTATION_RATE = 0.001  # Mutation probability per chromosome
 
 SIZE  = 10 # Matrix SIZE x SIZE
 WORDS = ["TWAALF", "EEN", "TWEE",  "DRIE", "VIER", "VIJF",   "ZES", "ZEVEN",
@@ -22,15 +22,41 @@ ORDER = [([5,10,15],                   ['h',],        [0,  15]),
          ([12,],                       ['h',],        [97, 99]),
          ([17,18,19],                  ['h','v','d'], [0,  99])]
 
-# Unique characters in list of words
-UNIQUE = list(set("".join(WORDS)))
 
 class Chromosome:
+    def __init__(self, i, j):
+        self.i = i
+        self.j = j
+        self.word = WORDS[ORDER[i][0][j]]
+        self.length = len(self.word)
+        self.random()
 
+    def random(self):
+        self.direction = random.choice(ORDER[self.i][1])
+        self.start = random.randint(ORDER[self.i][2][0], ORDER[self.i][2][1])
+
+    def __str__(self):
+        return "({}, {} {})".format(self.word, self.start, self.direction)
+
+    def copyfrom(self, other):
+        self.i = other.i
+        self.j = other.j
+        self.word = other.word
+        self.length = other.length
+        self.direction = other.direction
+
+
+class Gene:
     def __init__(self):
-        self.matrix = None
+        self.chromosomes = []
+        for i, T in enumerate(ORDER):
+            for j,_ in enumerate(T[0]):
+                self.chromosomes.append(Chromosome(i, j))
+
+        self.matrix = ['.']*SIZE*SIZE
         self.random()
         self.count, self.value = self.fitness()
+
 
     def __str__(self):
         s = ""
@@ -40,108 +66,99 @@ class Chromosome:
             s += c + ' '
         return s
 
+
+    def createmat(self):
+        for c in self.chromosomes:
+            # Horizontal
+            if c.direction == 'h':
+                x = c.start % SIZE
+                y = c.start / SIZE
+                for i in range(c.length):
+                    if x > SIZE-1:
+                        break
+                    self.matrix[y*SIZE+x] = c.word[i]
+                    x += 1
+
+            # Vertical
+            elif c.direction == 'v':
+                x = c.start % SIZE
+                y = c.start / SIZE
+                for i in range(c.length):
+                    if y > SIZE-1:
+                        break
+                    self.matrix[y*SIZE+x] = c.word[i]
+                    y += 1
+
+            # Diagonal
+            else:
+                x = c.start % SIZE
+                y = c.start / SIZE
+                for i in range(c.length):
+                    if x > SIZE-1 or y > SIZE-1:
+                        break
+                    self.matrix[y*SIZE+x] = c.word[i]
+                    x += 1
+                    y += 1
+
+
     def random(self):
-        self.matrix = ['.']*SIZE*SIZE
+        for c in self.chromosomes:
+            c.random()
+        self.createmat()
+            
 
-        for T in ORDER:
-            random.shuffle(T[0])
-            for wid in T[0]:
-                d = random.choice(T[1]) # Select random direction
-                w = WORDS[wid]          # Word
-                l = len(w)              # Length of word
-
-                # Horizontal
-                if d == 'h':
-                    at = random.randint(T[2][0], T[2][1]-l+1)
-                    self.matrix[at:at+l] = w
-
-                # Vertical
-                elif d == 'v':
-                    at = random.randint(T[2][0], T[2][1])
-                    x = at % SIZE
-                    y = at / SIZE
-                    for i in range(l):
-                        at = (i+y) * SIZE + x
-                        if at > SIZE*SIZE-1:
-                            break
-                        self.matrix[at] = WORDS[wid][i]
-
-                # Diagonal
-                else:
-                    at = random.randint(T[2][0], T[2][1])
-                    x = at % SIZE
-                    y = at / SIZE
-                    for i in range(l):
-                        at = (i+y) * SIZE + (i+x)
-                        if at > SIZE*SIZE-1:
-                            break
-                        self.matrix[at] = WORDS[wid][i]
-
-
-    def find(self, word, dirs, begin, end):
-        length = len(word)
+    def find(self, c):
         count = 0
 
-        # horizontal
-        if 'h' in dirs:
-            for i in range(begin, end+1):
-                x = i % SIZE
-                y = i / SIZE
-                c = 0
-                for j in range(length):
-                    if x+j >= SIZE:
-                        break
+        # Horizontal
+        if c.direction == 'h':
+            x = c.start % SIZE
+            y = c.start / SIZE
+            for i in range(c.length):
+                if x > SIZE-1:
+                    break
+                count += 1 * (self.matrix[y*SIZE+x] == c.word[i])
+                x += 1
 
-                    at = y*SIZE + (x+j)
-                    if self.matrix[at] == word[j]:
-                        c += 1
-                count = max(count, c)
+        # Vertical
+        elif c.direction == 'v':
+            x = c.start % SIZE
+            y = c.start / SIZE
+            for i in range(c.length):
+                if y > SIZE-1:
+                    break
+                count += 1 * (self.matrix[y*SIZE+x] == c.word[i])
+                y += 1
 
-        # vertical
-        if 'v' in dirs:
-            for i in range(begin, end+1):
-                x = i % SIZE
-                y = i / SIZE
-                c = 0
-                for j in range(length):
-                    if y+j >= SIZE:
-                        break
-
-                    at = (y+j)*SIZE + x
-                    if self.matrix[at] == word[j]:
-                        c += 1
-                count = max(count, c)
-
-        # diagonal
-        if 'd' in dirs:
-            for i in range(begin, end+1):
-                x = i % SIZE
-                y = i / SIZE
-                c = 0
-                for j in range(length):
-                    if x+j >= SIZE or y+j >= SIZE:
-                        break
-
-                    at = (y+j)*SIZE + (x+j)
-                    if self.matrix[at] == word[j]:
-                        c += 1
-                count = max(count, c)
+        # Diagonal
+        else:
+            x = c.start % SIZE
+            y = c.start / SIZE
+            for i in range(c.length):
+                if x > SIZE-1 or y > SIZE-1:
+                    break
+                count += 1 * (self.matrix[y*SIZE+x] == c.word[i])
+                x += 1
+                y += 1
 
         return count
 
+
     def fitness(self):
         count = 0
-        for T in ORDER:
-            for wid in T[0]:
-                count += self.find(WORDS[wid], T[1], T[2][0], T[2][1])
-
+        for c in self.chromosomes:
+            count += self.find(c)
         return count, 100*count+self.matrix.count('.')
+
 
     def copyfrom(self, other):
         self.count = other.count
         self.value = other.value
         for i,x in enumerate(other.matrix):
             self.matrix[i] = x
+        for i,c in enumerate(other.chromosomes):
+            self.chromosomes[i].copyfrom(c)
+
 
 
 def GenerateOffspring(pool, parents):
@@ -154,20 +171,17 @@ def GenerateOffspring(pool, parents):
     for child in pool[1:]:
         p1 = random.choice(parents)
         p2 = random.choice(parents)
-        x1 = random.randint(0, SIZE-2)
-        x2 = random.randint(x1+1, SIZE-1)
-        y1 = random.randint(0, SIZE-2)
-        y2 = random.randint(y1+1, SIZE-1)
 
-        for i in range(0, SIZE):
-            for j in range(0, SIZE):
-                if random.random() < MUTATION_RATE and child.matrix[i*SIZE+j] == '.':
-                    child.matrix[i*SIZE+j] = random.choice(UNIQUE)
-                elif i >= y1 and i <= y2 and j >= x1 and j <= x2:
-                    child.matrix[i*SIZE+j] = p1.matrix[i*SIZE+j]
-                else:
-                    child.matrix[i*SIZE+j] = p2.matrix[i*SIZE+j]
-
+        for i,c in enumerate(child.chromosomes):
+            r = random.random()
+            if r < MUTATION_RATE:
+                c.random()
+            elif r < 0.5:
+                c.copyfrom(p1.chromosomes[i])
+            else:
+                c.copyfrom(p2.chromosomes[i])
+        
+        child.createmat()
         child.count, child.value = child.fitness()
         if child.value > bestval:
             best = child
@@ -195,40 +209,41 @@ def SelectParents(pool, parents, total_value):
         if i == len(rands):
             break
 
-def GenerateChromosomes(N):
+def GenerateGenes(N):
     pool = []
     total_value = 0
     for i in range(N):
-        pool.append(Chromosome())
+        pool.append(Gene())
         total_value += pool[i].value
 
     return pool, total_value
             
 
 if __name__ == "__main__":
-    pool, total_value = GenerateChromosomes(NUM_POOL)
-    parents, _ = GenerateChromosomes(NUM_PARENTS)
+    pool, total_value = GenerateGenes(NUM_POOL)
+    parents, _ = GenerateGenes(NUM_PARENTS)
 
     max_score = 0
     for T in ORDER:
         max_score += sum(map(len, [WORDS[i] for i in T[0]]))
 
     i = 0
+    g = 0
     t = time.time()
     best = parents[0]
     while True:
         SelectParents(pool, parents, total_value)
         total_value = GenerateOffspring(pool, parents)
 
-        if i % 5 == 0 and i > 0:
-            tnow = time.time()
-            mps = NUM_POOL / (tnow - t)
-            mps *= 5.0
-            t = tnow
-            print "\n[{}] {} {}/{} {:0.1f} mp/s".format(i, best.value,
+        g += 1
+        n = time.time() - t
+        if n > 5.0:
+            mps = g*NUM_POOL / n
+            t += n
+            g = 0
+            print "[{}] {} {}/{} {:0.1f} mp/s".format(i, best.value,
                                                       best.count, max_score,
                                                       mps)
-            print best
             sys.stdout.flush()
 
         if best.count == max_score:
