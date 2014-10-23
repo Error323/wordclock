@@ -76,7 +76,6 @@ class Gene:
             for j,_ in enumerate(T[0]):
                 self.chromosomes.append(Chromosome(i, j))
 
-        self.matrix = ['.']*SIZE*SIZE
         self.random()
         self.count, self.value = self.fitness()
 
@@ -91,6 +90,7 @@ class Gene:
 
 
     def createmat(self):
+        self.matrix = ['.']*SIZE*SIZE
         for c in self.chromosomes:
             assert(c.start in c.startpts[c.direction])
             # Horizontal
