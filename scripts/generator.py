@@ -15,9 +15,9 @@ WORDS = ["TWAALF", "EEN", "TWEE",  "DRIE", "VIER", "VIJF",   "ZES", "ZEVEN",
          "HALF", "JANJELLE", "MARLOES", "PUCK"]
 
 # Tuples ([words], [valid directions], [start, stop])
-ORDER = [([5,10,15],                   ['h',],        [0,  15]), 
-         ([13, 14],                    ['h',],        [15, 25]), 
-         ([16,],                       ['h',],        [23, 29]), 
+ORDER = [([5,10,15],                   ['h',],        [0,  14]), 
+         ([13, 14],                    ['h',],        [16, 24]), 
+         ([16,],                       ['h',],        [26, 29]), 
          ([0,1,2,3,4,5,6,7,8,9,10,11], ['h','v','d'], [30, 96]),
          ([12,],                       ['h',],        [97, 99]),
          ([17,18,19],                  ['h','v','d'], [0,  99])]
@@ -31,14 +31,21 @@ class Chromosome:
         self.length = len(self.word)
         self.startpts = {'v':[], 'h':[], 'd':[]}
 
-        for s in range(ORDER[i][2][0], ORDER[i][2][1]+1):
+        start = ORDER[i][2][0]
+        end = ORDER[i][2][1]
+        ex = end % SIZE
+        ey = end / SIZE
+        for s in range(start, end+1):
             x = s % SIZE
             y = s / SIZE
-            if x <= SIZE-self.length:
+
+            if (x <= SIZE-self.length and y < ey) or x <= ex-self.length+1:
                 self.startpts['h'].append(s)
-            if y <= SIZE-self.length:
+
+            if (y <= SIZE-self.length and x < ex) or y <= ey-self.length+1:
                 self.startpts['v'].append(s)
-            if x <= SIZE-self.length and y <= SIZE-self.length:
+
+            if ((x <= SIZE-self.length and y <= SIZE-self.length and x < ex and y < ey) or (x <= ex-self.length+1 and y <= ey-self.length+1)):
                 self.startpts['d'].append(s)
 
         self.random()
@@ -48,7 +55,10 @@ class Chromosome:
         self.start = random.choice(self.startpts[self.direction])
 
     def __str__(self):
-        return "({}, {} {})".format(self.word, self.start, self.direction)
+        dirs = {}
+        for d in ORDER[self.i][1]:
+            dirs[d] = self.startpts[d]
+        return "({} {:02d} {} {})".format(self.direction, self.start, self.word, dirs)
 
     def copyfrom(self, other):
         self.i = other.i
@@ -56,6 +66,7 @@ class Chromosome:
         self.word = other.word
         self.length = other.length
         self.direction = other.direction
+        self.start = other.start
 
 
 class Gene:
@@ -81,13 +92,13 @@ class Gene:
 
     def createmat(self):
         for c in self.chromosomes:
+            assert(c.start in c.startpts[c.direction])
             # Horizontal
             if c.direction == 'h':
                 x = c.start % SIZE
                 y = c.start / SIZE
                 for i in range(c.length):
-                    if x > SIZE-1:
-                        break
+                    assert(x < SIZE)
                     self.matrix[y*SIZE+x] = c.word[i]
                     x += 1
 
@@ -96,8 +107,7 @@ class Gene:
                 x = c.start % SIZE
                 y = c.start / SIZE
                 for i in range(c.length):
-                    if y > SIZE-1:
-                        break
+                    assert(y < SIZE)
                     self.matrix[y*SIZE+x] = c.word[i]
                     y += 1
 
@@ -106,8 +116,7 @@ class Gene:
                 x = c.start % SIZE
                 y = c.start / SIZE
                 for i in range(c.length):
-                    if x > SIZE-1 or y > SIZE-1:
-                        break
+                    assert(x < SIZE and y < SIZE)
                     self.matrix[y*SIZE+x] = c.word[i]
                     x += 1
                     y += 1
@@ -127,8 +136,7 @@ class Gene:
             x = c.start % SIZE
             y = c.start / SIZE
             for i in range(c.length):
-                if x > SIZE-1:
-                    break
+                assert(x < SIZE)
                 count += 1 * (self.matrix[y*SIZE+x] == c.word[i])
                 x += 1
 
@@ -137,8 +145,7 @@ class Gene:
             x = c.start % SIZE
             y = c.start / SIZE
             for i in range(c.length):
-                if y > SIZE-1:
-                    break
+                assert(y < SIZE)
                 count += 1 * (self.matrix[y*SIZE+x] == c.word[i])
                 y += 1
 
@@ -147,8 +154,7 @@ class Gene:
             x = c.start % SIZE
             y = c.start / SIZE
             for i in range(c.length):
-                if x > SIZE-1 or y > SIZE-1:
-                    break
+                assert(x < SIZE and y < SIZE)
                 count += 1 * (self.matrix[y*SIZE+x] == c.word[i])
                 x += 1
                 y += 1
@@ -186,6 +192,7 @@ def GenerateOffspring(pool, parents):
 
         for i,c in enumerate(child.chromosomes):
             r = random.random()
+
             if r < MUTATION_RATE:
                 c.random()
             elif r < 0.5:
@@ -253,6 +260,7 @@ if __name__ == "__main__":
             mps = g*NUM_POOL / n
             t += n
             g = 0
+            print best
             print "[{}] {} {}/{} {:0.1f} mp/s".format(i, best.value,
                                                       best.count, max_score,
                                                       mps)
@@ -261,7 +269,7 @@ if __name__ == "__main__":
         if best.count == max_score:
             print "\n[{}] found!".format(i)
             print best
-            print list(set("".join(best.matrix)))
+            print "".join(best.matrix)
             break
 
         i += 1
