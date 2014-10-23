@@ -29,11 +29,23 @@ class Chromosome:
         self.j = j
         self.word = WORDS[ORDER[i][0][j]]
         self.length = len(self.word)
+        self.startpts = {'v':[], 'h':[], 'd':[]}
+
+        for s in range(ORDER[i][2][0], ORDER[i][2][1]+1):
+            x = s % SIZE
+            y = s / SIZE
+            if x <= SIZE-self.length:
+                self.startpts['h'].append(s)
+            if y <= SIZE-self.length:
+                self.startpts['v'].append(s)
+            if x <= SIZE-self.length and y <= SIZE-self.length:
+                self.startpts['d'].append(s)
+
         self.random()
 
     def random(self):
         self.direction = random.choice(ORDER[self.i][1])
-        self.start = random.randint(ORDER[self.i][2][0], ORDER[self.i][2][1])
+        self.start = random.choice(self.startpts[self.direction])
 
     def __str__(self):
         return "({}, {} {})".format(self.word, self.start, self.direction)
