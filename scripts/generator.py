@@ -39,14 +39,20 @@ class Chromosome:
             x = s % SIZE
             y = s / SIZE
 
-            if (x <= SIZE-self.length and y < ey) or x <= ex-self.length+1:
-                self.startpts['h'].append(s)
+            if x <= SIZE-self.length:
+                idx = y*SIZE+x+self.length-1
+                if start <= idx <= end:
+                    self.startpts['h'].append(s)
+            
+            if y <= SIZE-self.length:
+                idx = (y+self.length-1)*SIZE+x
+                if start <= idx <= end:
+                    self.startpts['v'].append(s)
 
-            if (y <= SIZE-self.length and x < ex) or y <= ey-self.length+1:
-                self.startpts['v'].append(s)
-
-            if ((x <= SIZE-self.length and y <= SIZE-self.length and x < ex and y < ey) or (x <= ex-self.length+1 and y <= ey-self.length+1)):
-                self.startpts['d'].append(s)
+            if x <= SIZE-self.length and y <= SIZE-self.length:
+                idx = (y+self.length-1)*SIZE+x+self.length-1
+                if start <= idx <= end:
+                    self.startpts['d'].append(s)
 
         self.random()
 
@@ -81,12 +87,12 @@ class Gene:
 
 
     def __str__(self):
-        s = ""
+        s = "0 1 2 3 4 5 6 7 8 9\n\n"
         for i,c in enumerate(self.matrix):
             if i % SIZE == 0 and i > 0:
-                s += "\n"
+                s += ' ' + str(i/10-1) + "\n"
             s += c + ' '
-        return s
+        return s + ' 9'
 
 
     def createmat(self):
