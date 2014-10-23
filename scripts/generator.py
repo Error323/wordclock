@@ -260,17 +260,13 @@ if __name__ == "__main__":
             mps = g*NUM_POOL / n
             t += n
             g = 0
-            print best
+            if best.count == max_score:
+                print "".join(best.matrix)
+                print best
             print "[{}] {} {}/{} {:0.1f} mp/s".format(i, best.value,
                                                       best.count, max_score,
                                                       mps)
             sys.stdout.flush()
-
-        if best.count == max_score:
-            print "\n[{}] found!".format(i)
-            print best
-            print "".join(best.matrix)
-            break
 
         i += 1
 
