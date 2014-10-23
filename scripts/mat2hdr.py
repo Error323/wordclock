@@ -80,7 +80,6 @@ def mat2str(M):
 
 if __name__ == "__main__":
     config = get_configuration()
-    print mat2str(config.matrix)
     alphabet = [chr(i+65) for i in range(26)]
     matrix = config.matrix
     full = [' '] * SIZE*SIZE
@@ -119,9 +118,9 @@ if __name__ == "__main__":
         if i % SIZE == 0 and i > 0:
             s += "\n"
         if i < len(output)-1:
-            s += hex(c) + ','
+            s += str(c) + ','
         else:
-            s += hex(c)
+            s += str(c)
 
     print "\nstatic const uint32_t hours[] = {"
     for w in WORDS[:11]:
