@@ -12,14 +12,14 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "Matrix.h"
+#include "LightSensor.h"
 
 /* Settings */
 #define LIGHT_PIN 5 // Light sensor pin
 #define B1_PIN    7 // Button 1 pin
 #define B2_PIN    8 // Button 2 pin
 #define LED_PIN   6 // Matrix led pin
-#define WIDTH    10 // Matrix board width
-#define HEIGHT   10 // Matrix board height
+#define SIZE     10 // Matrix board size x size
 #define FPS      40 // Frames per second to achieve
 
 /* Macros */
@@ -32,10 +32,13 @@ DateTime marloes  = DateTime(1986, 5, 10);
 
 /* Globals */
 /** @brief the hardware led matrix */
-Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(WIDTH * HEIGHT, LED_PIN);
+Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(SIZE*SIZE, LED_PIN);
 
 /** @brief the realtime clock */
 RTC_DS3231 rtc;
+
+/** @brief the light sensor */
+LightSensor light_sensor(LIGHT_PIN);
 
 /** @brief convert time to wordsmask */
 uint32_t time2words(const DateTime &time)
@@ -87,7 +90,6 @@ void setup()
   rtc.begin();
   led_matrix.begin();
 
-  pinMode(LIGHT_PIN, INPUT);
   pinMode(B1_PIN, INPUT);
   pinMode(B2_PIN, INPUT);
 
@@ -100,10 +102,11 @@ void setup()
 void loop()
 {
   uint32_t ms = millis();
+  light_sensor.Update();
   DateTime time = rtc.now();
   uint32_t activated = time2words(time);
   
-  for (uint8_t i = 0; i < WIDTH*HEIGHT; i++)
+  for (uint8_t i = 0; i < SIZE*SIZE; i++)
   {
     if (matrix[i]&activated)
       led_matrix.setPixelColor(i, 255, 0, 0);
@@ -111,6 +114,7 @@ void loop()
       led_matrix.setPixelColor(i, 0);
   }
   
+  led_matrix.setBrightness(light_sensor.Brightness());
   led_matrix.show();
   
   int32_t waittime = (1000/FPS) - (millis() - ms);
