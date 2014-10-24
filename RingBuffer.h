@@ -21,7 +21,8 @@ public:
     float sum = 0.0f;
     for (uint8_t i = 0; i < mSize; i++)
       sum += mBuffer[i];
-    return static_cast<T>(sum / mSize + 0.5f);
+    sum /= mSize;
+    return static_cast<T>(sum + 0.5f);
   }
 
   uint8_t BufferSize()

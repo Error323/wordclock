@@ -7,7 +7,7 @@ import sys
 NUM_POOL      = 1000   # Size of the chromosome pool
 NUM_PARENTS   = 15     # Parents that will mate
 NUM_RANDOM    = 3      # Random parents
-MUTATION_RATE = 0.001  # Mutation probability per chromosome
+MUTATION_RATE = 0.001  # Mutation probability per gene
 
 SIZE  = 10 # Matrix SIZE x SIZE
 WORDS = ["TWAALF", "EEN", "TWEE",  "DRIE", "VIER", "VIJF",   "ZES", "ZEVEN",
@@ -23,7 +23,7 @@ ORDER = [([5,10,15],                   ['h',],        [0,  14]),
          ([17,18,19],                  ['h','v','d'], [0,  99])]
 
 
-class Chromosome:
+class Gene:
     def __init__(self, i, j):
         self.i = i
         self.j = j
@@ -75,12 +75,12 @@ class Chromosome:
         self.start = other.start
 
 
-class Gene:
+class Chromosome:
     def __init__(self):
-        self.chromosomes = []
+        self.genes = []
         for i, T in enumerate(ORDER):
             for j,_ in enumerate(T[0]):
-                self.chromosomes.append(Chromosome(i, j))
+                self.genes.append(Gene(i, j))
 
         self.random()
         self.count, self.value = self.fitness()
@@ -97,7 +97,7 @@ class Gene:
 
     def createmat(self):
         self.matrix = ['.']*SIZE*SIZE
-        for c in self.chromosomes:
+        for c in self.genes:
             assert(c.start in c.startpts[c.direction])
             # Horizontal
             if c.direction == 'h':
@@ -129,7 +129,7 @@ class Gene:
 
 
     def random(self):
-        for c in self.chromosomes:
+        for c in self.genes:
             c.random()
         self.createmat()
             
@@ -170,7 +170,7 @@ class Gene:
 
     def fitness(self):
         count = 0
-        for c in self.chromosomes:
+        for c in self.genes:
             count += self.find(c)
         return count, 100*count+self.matrix.count('.')
 
@@ -180,8 +180,8 @@ class Gene:
         self.value = other.value
         for i,x in enumerate(other.matrix):
             self.matrix[i] = x
-        for i,c in enumerate(other.chromosomes):
-            self.chromosomes[i].copyfrom(c)
+        for i,c in enumerate(other.genes):
+            self.genes[i].copyfrom(c)
 
 
 
@@ -196,15 +196,15 @@ def GenerateOffspring(pool, parents):
         p1 = random.choice(parents)
         p2 = random.choice(parents)
 
-        for i,c in enumerate(child.chromosomes):
+        for i,c in enumerate(child.genes):
             r = random.random()
 
             if r < MUTATION_RATE:
                 c.random()
             elif r < 0.5:
-                c.copyfrom(p1.chromosomes[i])
+                c.copyfrom(p1.genes[i])
             else:
-                c.copyfrom(p2.chromosomes[i])
+                c.copyfrom(p2.genes[i])
         
         child.createmat()
         child.count, child.value = child.fitness()
@@ -234,19 +234,19 @@ def SelectParents(pool, parents, total_value):
         if i == len(rands):
             break
 
-def GenerateGenes(N):
+def GenerateChromosomes(N):
     pool = []
     total_value = 0
     for i in range(N):
-        pool.append(Gene())
+        pool.append(Chromosome())
         total_value += pool[i].value
 
     return pool, total_value
             
 
 if __name__ == "__main__":
-    pool, total_value = GenerateGenes(NUM_POOL)
-    parents, _ = GenerateGenes(NUM_PARENTS)
+    pool, total_value = GenerateChromosomes(NUM_POOL)
+    parents, _ = GenerateChromosomes(NUM_PARENTS)
 
     max_score = 0
     for T in ORDER:
