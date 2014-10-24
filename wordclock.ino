@@ -24,7 +24,7 @@
 
 /* Globals */
 /** @brief the hardware led matrix */
-static Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(SIZE*SIZE, LED_PIN);
+static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 
 /** @brief the realtime clock */
 static RTC_DS3231 rtc;

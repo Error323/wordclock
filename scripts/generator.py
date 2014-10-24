@@ -33,8 +33,6 @@ class Gene:
 
         start = ORDER[i][2][0]
         end = ORDER[i][2][1]
-        ex = end % SIZE
-        ey = end / SIZE
         for s in range(start, end+1):
             x = s % SIZE
             y = s / SIZE
