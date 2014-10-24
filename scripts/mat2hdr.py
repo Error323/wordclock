@@ -108,9 +108,9 @@ if __name__ == "__main__":
     for i, w in enumerate(W):
         K[w] = 1 << i
         if i > 3 and w in ["VIJF","TIEN"]:
-            print "static const uint32_t %s_%s= (1ul << %i)" % (w, ' ' * (len(m)-len(w)) ,i)
+            print "static const uint32_t %s_%s= (1ul << %i);" % (w, ' ' * (len(m)-len(w)) ,i)
         else:
-            print "static const uint32_t %s %s= (1ul << %i)" % (w, ' ' * (len(m)-len(w)) ,i)
+            print "static const uint32_t %s %s= (1ul << %i);" % (w, ' ' * (len(m)-len(w)) ,i)
 
     output = [0] * SIZE*SIZE
     for w in W:
