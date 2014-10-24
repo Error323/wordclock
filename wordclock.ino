@@ -11,7 +11,7 @@
 #include <RTC_DS3231.h>
 #include <Adafruit_NeoPixel.h>
 
-#include "Matrix.h"
+#include "WordClock.h"
 #include "LightSensor.h"
 
 /* Settings */
@@ -22,67 +22,15 @@
 #define SIZE     10 // Matrix board size x size
 #define FPS      40 // Frames per second to achieve
 
-/* Macros */
-#define Activate(x) activated |= x
-
-/* Birthdays */
-DateTime puck     = DateTime(2014, 3, 3);
-DateTime janjelle = DateTime(1991, 5, 15);
-DateTime marloes  = DateTime(1986, 5, 10);
-
 /* Globals */
 /** @brief the hardware led matrix */
-Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(SIZE*SIZE, LED_PIN);
+static Adafruit_NeoPixel led_matrix = Adafruit_NeoPixel(SIZE*SIZE, LED_PIN);
 
 /** @brief the realtime clock */
-RTC_DS3231 rtc;
+static RTC_DS3231 rtc;
 
 /** @brief the light sensor */
-LightSensor light_sensor(LIGHT_PIN);
-
-/** @brief convert time to wordsmask */
-uint32_t time2words(const DateTime &time)
-{
-  uint32_t activated = 0ul;
-  
-  uint8_t h = time.hour() % 12;
-  uint8_t m = (time.minute() + 2) / 5;
-
-  switch (m)
-  {
-    case 1: case 7:  Activate(VIJF);  Activate(OVER); break;
-    case 2: case 8:  Activate(TIEN);  Activate(OVER); break;
-    case 3:          Activate(KWART); Activate(OVER); break;
-    case 4: case 10: Activate(TIEN);  Activate(VOOR); break;
-    case 5: case 11: Activate(VIJF);  Activate(VOOR); break;
-    case 9:          Activate(KWART); Activate(VOOR); break;
-    default: break;
-  }
-
-  if (m < 4)
-    Activate(hours[h]);
-  else
-  if (m < 9)
-  {
-    Activate(HALF);
-    Activate(hours[(h+1)%12]);
-  }
-  else
-    Activate(hours[(h+1)%12]);
-
-  if (m == 0 || m == 12)
-    Activate(UUR);
-
-  // check birthdays
-  if (time.month() == puck.month() && time.day() == puck.day())
-    Activate(PUCK);
-  if (time.month() == marloes.month() && time.day() == marloes.day())
-    Activate(MARLOES);
-  if (time.month() == janjelle.month() && time.day() == janjelle.day())
-    Activate(JANJELLE);
-
-  return activated;
-}
+static LightSensor light_sensor(LIGHT_PIN);
 
 void setup()
 {
@@ -104,11 +52,11 @@ void loop()
   uint32_t ms = millis();
   light_sensor.Update();
   DateTime time = rtc.now();
-  uint32_t activated = time2words(time);
+  uint32_t activated = wc::time2words(time);
   
   for (uint8_t i = 0; i < SIZE*SIZE; i++)
   {
-    if (matrix[i]&activated)
+    if (wc::wordclock[i]&activated)
       led_matrix.setPixelColor(i, 255, 0, 0);
     else
       led_matrix.setPixelColor(i, 0);
