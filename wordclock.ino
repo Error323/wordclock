@@ -32,6 +32,9 @@ static RTC_DS3231 rtc;
 /** @brief the light sensor */
 static LightSensor light_sensor(LIGHT_PIN);
 
+/** @brief the current time */
+static DateTime time;
+
 void setup()
 {
   Wire.begin();
@@ -44,14 +47,18 @@ void setup()
   digitalWrite(B1_PIN, LOW);
   digitalWrite(B2_PIN, LOW);  
 
-  randomSeed(analogRead(0));
+  if (!rtc.isrunning())
+    rtc.adjust(DateTime(__DATE__, __TIME__));
+
+  time = rtc.now();
+  randomSeed(time.unixtime());
 }
 
 void loop()
 {
   uint32_t ms = millis();
   light_sensor.Update();
-  DateTime time = rtc.now();
+  time = rtc.now();
   uint32_t activated = wc::time2words(time);
   
   for (uint8_t i = 0; i < SIZE*SIZE; i++)
