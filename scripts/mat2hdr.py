@@ -30,14 +30,10 @@ def find(word, dirs, start, end, matrix):
     length = len(word)
 
     for d in dirs:
-        step = 1
-        if d == 'v': step = SIZE
-        elif d == 'd': step = SIZE+1
-
         for i in range(start, end+1):
             indices = []
             for j in range(length):
-                index = i+step*j
+                index = i+d*j
                 if index <= end and matrix[index] == word[j]:
                     add(index, indices)
                 else:
