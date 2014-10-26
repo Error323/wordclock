@@ -15,10 +15,10 @@
 #include "LightSensor.h"
 
 /* Settings */
-#define LIGHT_PIN 5 // Light sensor pin
-#define B1_PIN    7 // Button 1 pin
+#define LIGHT_PIN 0 // Light sensor pin
+#define B1_PIN    6 // Button 1 pin
 #define B2_PIN    8 // Button 2 pin
-#define LED_PIN   6 // Matrix led pin
+#define LED_PIN   7 // Matrix led pin
 #define SIZE     10 // Matrix board size x size
 #define FPS      40 // Frames per second to achieve
 
@@ -49,7 +49,7 @@ void setup()
 
   if (!rtc.isrunning())
     rtc.adjust(DateTime(__DATE__, __TIME__));
-
+    
   time = rtc.now();
   randomSeed(time.unixtime());
 }
@@ -64,11 +64,11 @@ void loop()
   for (uint8_t i = 0; i < SIZE*SIZE; i++)
   {
     if (wc::wordclock[i]&activated)
-      led_matrix.setPixelColor(i, 255, 0, 0);
+      led_matrix.setPixelColor(i, 0, 0, 255);
     else
       led_matrix.setPixelColor(i, 0);
   }
-  
+
   led_matrix.setBrightness(light_sensor.Brightness());
   led_matrix.show();
   
