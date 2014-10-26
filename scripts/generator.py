@@ -15,12 +15,15 @@ WORDS = ["TWAALF", "EEN", "TWEE",  "DRIE", "VIER", "VIJF",   "ZES", "ZEVEN",
          "HALF", "JANJELLE", "MARLOES", "PUCK"]
 
 # Tuples ([words], [valid directions], [start, stop])
-ORDER = [([5,10,15],                   ['h',],        [0,  14]), 
-         ([13, 14],                    ['h',],        [16, 24]), 
-         ([16,],                       ['h',],        [26, 29]), 
-         ([0,1,2,3,4,5,6,7,8,9,10,11], ['h','v','d'], [30, 95]),
-         ([12,],                       ['h',],        [97, 99]),
-         ([17,18,19],                  ['h','v','d'], [0,  99])]
+H = 1
+V = SIZE
+D = SIZE+1
+ORDER = [([5,10,15],                   [H,],    [0,  14]), 
+         ([13, 14],                    [H,],    [16, 24]), 
+         ([16,],                       [H,],    [26, 29]), 
+         ([0,1,2,3,4,5,6,7,8,9,10,11], [H,V,D], [30, 95]),
+         ([12,],                       [H,],    [97, 99]),
+         ([17,18,19],                  [H,V,D], [0,  99])]
 
 
 class Gene:
@@ -29,7 +32,7 @@ class Gene:
         self.j = j
         self.word = WORDS[ORDER[i][0][j]]
         self.length = len(self.word)
-        self.startpts = {'v':[], 'h':[], 'd':[]}
+        self.startpts = {V:[], H:[], D:[]}
 
         start = ORDER[i][2][0]
         end = ORDER[i][2][1]
@@ -40,17 +43,17 @@ class Gene:
             if x <= SIZE-self.length:
                 idx = y*SIZE+x+self.length-1
                 if start <= idx <= end:
-                    self.startpts['h'].append(s)
+                    self.startpts[H].append(s)
             
             if y <= SIZE-self.length:
                 idx = (y+self.length-1)*SIZE+x
                 if start <= idx <= end:
-                    self.startpts['v'].append(s)
+                    self.startpts[V].append(s)
 
             if x <= SIZE-self.length and y <= SIZE-self.length:
                 idx = (y+self.length-1)*SIZE+x+self.length-1
                 if start <= idx <= end:
-                    self.startpts['d'].append(s)
+                    self.startpts[D].append(s)
 
         self.random()
 
@@ -96,80 +99,21 @@ class Chromosome:
     def createmat(self):
         self.matrix = ['.']*SIZE*SIZE
         for c in self.genes:
-            assert(c.start in c.startpts[c.direction])
-            # Horizontal
-            if c.direction == 'h':
-                x = c.start % SIZE
-                y = c.start / SIZE
-                for i in range(c.length):
-                    assert(x < SIZE)
-                    self.matrix[y*SIZE+x] = c.word[i]
-                    x += 1
-
-            # Vertical
-            elif c.direction == 'v':
-                x = c.start % SIZE
-                y = c.start / SIZE
-                for i in range(c.length):
-                    assert(y < SIZE)
-                    self.matrix[y*SIZE+x] = c.word[i]
-                    y += 1
-
-            # Diagonal
-            else:
-                x = c.start % SIZE
-                y = c.start / SIZE
-                for i in range(c.length):
-                    assert(x < SIZE and y < SIZE)
-                    self.matrix[y*SIZE+x] = c.word[i]
-                    x += 1
-                    y += 1
+            for i in range(c.length):
+                self.matrix[c.start+i*c.direction] = c.word[i]
 
 
     def random(self):
         for c in self.genes:
             c.random()
         self.createmat()
-            
-
-    def find(self, c):
-        count = 0
-
-        # Horizontal
-        if c.direction == 'h':
-            x = c.start % SIZE
-            y = c.start / SIZE
-            for i in range(c.length):
-                assert(x < SIZE)
-                count += 1 * (self.matrix[y*SIZE+x] == c.word[i])
-                x += 1
-
-        # Vertical
-        elif c.direction == 'v':
-            x = c.start % SIZE
-            y = c.start / SIZE
-            for i in range(c.length):
-                assert(y < SIZE)
-                count += 1 * (self.matrix[y*SIZE+x] == c.word[i])
-                y += 1
-
-        # Diagonal
-        else:
-            x = c.start % SIZE
-            y = c.start / SIZE
-            for i in range(c.length):
-                assert(x < SIZE and y < SIZE)
-                count += 1 * (self.matrix[y*SIZE+x] == c.word[i])
-                x += 1
-                y += 1
-
-        return count
 
 
     def fitness(self):
         count = 0
         for c in self.genes:
-            count += self.find(c)
+            for i in range(c.length):
+                count += 1 * (self.matrix[c.start+i*c.direction] == c.word[i])
         return count, 100*count+self.matrix.count('.')
 
 
