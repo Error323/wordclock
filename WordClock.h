@@ -25,7 +25,7 @@ DateTime janjelle = DateTime(1991, 5, 15);
 DateTime marloes  = DateTime(1986, 5, 10);
 
 /* Macros */
-#define Activate(x) activated |= x
+#define Activate(x) activated |= (x)
 
 static const uint32_t VIJF     = (1ul << 0);
 static const uint32_t TIEN     = (1ul << 1);

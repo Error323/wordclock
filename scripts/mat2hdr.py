@@ -10,82 +10,42 @@ def get_configuration():
     )
     parser.add_argument("--matrix", "-m",
       help="{0}x{0} matrix in column major".format(SIZE),
-      default="JKWARTIEN.AVIJFMVOORNOVERAHALFJ.T.DRIEVNETWAALFPIELAEZ.O.UJGLCEEEENCFEEH.V.S.K.N.TIENVIER.ELFN...UUR")
+    )
 
     return parser.parse_args()
 
 
+def add(index, indices):
+    """Reverse x on uneven rows as our led matrix is soldered that way"""
+    x = index % SIZE
+    y = index / SIZE
+    if y % 2 == 0:
+        indices.append(index)
+    else:
+        indices.append(y*SIZE+(SIZE-1-x))
+
+
 def find(word, dirs, start, end, matrix):
+    """Find word in the matrix"""
     length = len(word)
-    indices = []
 
-    # horizontal
-    if 'h' in dirs:
+    for d in dirs:
+        step = 1
+        if d == 'v': step = SIZE
+        elif d == 'd': step = SIZE+1
+
         for i in range(start, end+1):
-            x = i % SIZE
-            y = i / SIZE
             indices = []
             for j in range(length):
-                if x+j >= SIZE:
-                    break
-
-                at = y*SIZE + (x+j)
-                if matrix[at] == word[j] and at in range(start,end+1):
-                    if y % 2 == 0: 
-                        indices.append(at) 
-                    else:
-                        indices.append(y*SIZE+(SIZE-1-(x+j)))
+                index = i+step*j
+                if index <= end and matrix[index] == word[j]:
+                    add(index, indices)
                 else:
                     break
-
                 if len(indices) == length:
                     return indices
 
-    # vertical
-    if 'v' in dirs:
-        for i in range(start, end+1):
-            x = i % SIZE
-            y = i / SIZE
-            indices = []
-            for j in range(length):
-                if y+j >= SIZE:
-                    break
-
-                at = (y+j)*SIZE + x
-                if matrix[at] == word[j] and at in range(start,end+1):
-                    if (y+j) % 2 == 0: 
-                        indices.append(at) 
-                    else:
-                        indices.append((y+j)*SIZE+(SIZE-1-x))
-                else:
-                    break
-
-                if len(indices) == length:
-                    return indices
-
-    # diagonal
-    if 'd' in dirs:
-        for i in range(start, end+1):
-            x = i % SIZE
-            y = i / SIZE
-            indices = []
-            for j in range(length):
-                if x+j >= SIZE or y+j >= SIZE:
-                    break
-
-                at = (y+j)*SIZE + (x+j)
-                if matrix[at] == word[j] and at in range(start,end+1):
-                    if (y+j) % 2 == 0: 
-                        indices.append(at) 
-                    else:
-                        indices.append((y+j)*SIZE+(SIZE-1-(x+j)))
-                else:
-                    break
-
-                if len(indices) == length:
-                    return indices
-
-    raise ValueError("No indices found for {}".format(word))
+    raise ValueError("No indices found for ({}, {}, {}-{})".format(word, dirs, start, end))
 
 def mat2str(M):
     s = " * "
