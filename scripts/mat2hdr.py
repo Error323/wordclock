@@ -15,57 +15,75 @@ def get_configuration():
     return parser.parse_args()
 
 
-def find(word, matrix):
+def find(word, dirs, start, end, matrix):
     length = len(word)
     indices = []
 
     # horizontal
-    for i in range(SIZE*SIZE):
-        x = i % SIZE
-        y = i / SIZE
-        indices = []
-        for j in range(length):
-            if x+j >= SIZE:
-                break
+    if 'h' in dirs:
+        for i in range(start, end+1):
+            x = i % SIZE
+            y = i / SIZE
+            indices = []
+            for j in range(length):
+                if x+j >= SIZE:
+                    break
 
-            at = y*SIZE + (x+j)
-            if matrix[at] == word[j]:
-                indices.append(at)
+                at = y*SIZE + (x+j)
+                if matrix[at] == word[j] and at in range(start,end+1):
+                    if y % 2 == 0: 
+                        indices.append(at) 
+                    else:
+                        indices.append(y*SIZE+(SIZE-1-(x+j)))
+                else:
+                    break
 
-        if len(indices) == length:
-            return indices
+                if len(indices) == length:
+                    return indices
 
     # vertical
-    for i in range(SIZE*SIZE):
-        x = i % SIZE
-        y = i / SIZE
-        indices = []
-        for j in range(length):
-            if y+j >= SIZE:
-                break
+    if 'v' in dirs:
+        for i in range(start, end+1):
+            x = i % SIZE
+            y = i / SIZE
+            indices = []
+            for j in range(length):
+                if y+j >= SIZE:
+                    break
 
-            at = (y+j)*SIZE + x
-            if matrix[at] == word[j]:
-                indices.append(at)
+                at = (y+j)*SIZE + x
+                if matrix[at] == word[j] and at in range(start,end+1):
+                    if (y+j) % 2 == 0: 
+                        indices.append(at) 
+                    else:
+                        indices.append((y+j)*SIZE+(SIZE-1-x))
+                else:
+                    break
 
-        if len(indices) == length:
-            return indices
+                if len(indices) == length:
+                    return indices
 
     # diagonal
-    for i in range(SIZE*SIZE):
-        x = i % SIZE
-        y = i / SIZE
-        indices = []
-        for j in range(length):
-            if x+j >= SIZE or y+j >= SIZE:
-                break
+    if 'd' in dirs:
+        for i in range(start, end+1):
+            x = i % SIZE
+            y = i / SIZE
+            indices = []
+            for j in range(length):
+                if x+j >= SIZE or y+j >= SIZE:
+                    break
 
-            at = (y+j)*SIZE + (x+j)
-            if matrix[at] == word[j]:
-                indices.append(at)
+                at = (y+j)*SIZE + (x+j)
+                if matrix[at] == word[j] and at in range(start,end+1):
+                    if (y+j) % 2 == 0: 
+                        indices.append(at) 
+                    else:
+                        indices.append((y+j)*SIZE+(SIZE-1-(x+j)))
+                else:
+                    break
 
-        if len(indices) == length:
-            return indices
+                if len(indices) == length:
+                    return indices
 
     raise ValueError("No indices found for {}".format(word))
 
@@ -103,20 +121,20 @@ if __name__ == "__main__":
     print mat2str(full)
     print " */\n"
 
-    K = {}
     m = max(W, key=len)
-    for i, w in enumerate(W):
-        K[w] = 1 << i
-        if i > 3 and w in ["VIJF","TIEN"]:
-            print "static const uint32_t %s_%s= (1ul << %i);" % (w, ' ' * (len(m)-len(w)) ,i)
-        else:
-            print "static const uint32_t %s %s= (1ul << %i);" % (w, ' ' * (len(m)-len(w)) ,i)
-
     output = [0] * SIZE*SIZE
-    for w in W:
-        I = find(w, matrix)
-        for i in I:
-            output[i] |= K[w]
+    j = 0
+    for T in ORDER:
+        for w in T[0]:
+            I = find(WORDS[w], T[1], T[2][0], T[2][1], matrix)
+            assert(len(I) == len(WORDS[w]))
+            for i in I:
+                output[i] |= (1 << j)
+            if j > 3 and WORDS[w] in ["VIJF","TIEN"]:
+                print "static const uint32_t %s_%s= (1ul << %i);" % (WORDS[w], ' ' * (len(m)-len(WORDS[w])) ,j)
+            else:
+                print "static const uint32_t %s %s= (1ul << %i);" % (WORDS[w], ' ' * (len(m)-len(WORDS[w])) ,j)
+            j += 1
 
     s = ""
     for i,c in enumerate(output):
