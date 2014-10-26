@@ -12,7 +12,7 @@ MUTATION_RATE = 0.001  # Mutation probability per gene
 SIZE  = 10 # Matrix SIZE x SIZE
 WORDS = ["TWAALF", "EEN", "TWEE",  "DRIE", "VIER", "VIJF",   "ZES", "ZEVEN",
          "ACHT", "NEGEN", "TIEN",   "ELF", "UUR",   "VOOR", "OVER", "KWART",
-         "HALF", "JANJELLE", "MARLOES", "PUCK"]
+         "HALF", "JANJELLE", "MARLOES", "PUCK", "FELICIA"]
 
 # Tuples ([words], [valid directions], [start, stop])
 H = 1
@@ -23,7 +23,7 @@ ORDER = [([5,10,15],                   [H,],    [0,  14]),
          ([16,],                       [H,],    [26, 29]), 
          ([0,1,2,3,4,5,6,7,8,9,10,11], [H,V,D], [30, 95]),
          ([12,],                       [H,],    [97, 99]),
-         ([17,18,19],                  [H,V,D], [0,  99])]
+         ([17,18,19,20],               [H,V,D], [0,  99])]
 
 
 class Gene:
