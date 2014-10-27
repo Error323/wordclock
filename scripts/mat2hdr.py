@@ -15,16 +15,6 @@ def get_configuration():
     return parser.parse_args()
 
 
-def add(index, indices):
-    """Reverse x on uneven rows as our led matrix is soldered that way"""
-    x = index % SIZE
-    y = index / SIZE
-    if y % 2 == 0:
-        indices.append(index)
-    else:
-        indices.append(y*SIZE+(SIZE-1-x))
-
-
 def find(word, dirs, start, end, matrix):
     """Find word in the matrix"""
     length = len(word)
@@ -35,7 +25,7 @@ def find(word, dirs, start, end, matrix):
             for j in range(length):
                 index = i+d*j
                 if index <= end and matrix[index] == word[j]:
-                    add(index, indices)
+                    indices.append(index)
                 else:
                     break
                 if len(indices) == length:
