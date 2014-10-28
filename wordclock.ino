@@ -55,9 +55,9 @@ void ani_matrix(const uint32_t activated)
   static uint8_t speed[SIZE]; // speed in fps
   static uint8_t start[SIZE]; // start time in frames
   static uint8_t frame[SIZE]; // current frame
-  static uint8_t wsize[SIZE]; // current frame
+  static uint8_t asize[SIZE]; // animation length
   static uint8_t done = 0;
-  static uint8_t time = 0;
+  static uint8_t frame_time = 0;
   static uint32_t prev_activated = 0ul;
   static uint32_t tmp = 0ul;
   uint8_t i, j, c;
@@ -68,11 +68,11 @@ void ani_matrix(const uint32_t activated)
     {
       speed[i] = random(1, 6);
       start[i] = random(0, 10);
-      wsize[i] = random(5, SIZE);
+      asize[i] = random(5, SIZE);
       frame[i] = 0;
     }
     done = 0;
-    time = 0;
+    frame_time = 0;
     prev_activated = tmp;
     tmp = activated;
   }
@@ -84,37 +84,32 @@ void ani_matrix(const uint32_t activated)
       for (j = 0; j < SIZE; j++)
       {
         // perform animation tick
-        if (frame[j] >= start[j] + i && frame[j] < wsize[j] + start[j] + i)
+        if (frame[j] >= start[j] + i && frame[j] < asize[j] + start[j] + i)
         {
-          if (frame[j] > start[j]+i && wc::wordclock[i*SIZE+j] & activated)
+          if (frame[j] > start[j] + i && wc::wordclock[i*SIZE+j] & activated)
             led_matrix.setPixelColor(idx(i,j), color);
           else
           {
-            c = round(normal(frame[j]-i-start[j], wsize[j]-3) * 255);
+            c = round(normal(frame[j]-i-start[j], asize[j]-3) * 255);
             led_matrix.setPixelColor(idx(i,j), c, c, c);
           }
         }
         // leave (prev)activated as is, turn rest off
-        else
-        {
-          if (wc::wordclock[i*SIZE+j] & (prev_activated|activated))
-            continue;
-          else
-            led_matrix.setPixelColor(idx(i,j), 0);
-        }
+        else if ((wc::wordclock[i*SIZE+j] & (prev_activated|activated)) == 0ul)
+          led_matrix.setPixelColor(idx(i,j), 0);
       }
     }
 
     // increase counters, check if done
     done = 0;
-    for (uint8_t i = 0; i < SIZE; i++)
+    for (i = 0; i < SIZE; i++)
     {
-      if (frame[i] > wsize[i] + start[i] + SIZE)
+      if (frame[i] > asize[i] + start[i] + SIZE)
         done++;
-      if (time % speed[i] == 0)
+      if (frame_time % speed[i] == 0)
         frame[i]++;
     }
-    time++;
+    frame_time++;
   }
 }
 
