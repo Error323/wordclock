@@ -15,6 +15,9 @@
  * H N T I E N M U U R 
  */
 
+#ifndef WORDCLOCK_H
+#define WORDCLOCK_H
+
 #include <RTClib.h>
 
 namespace wc {
@@ -113,3 +116,5 @@ uint32_t time2words(const DateTime &time)
   return activated;
 }
 }; // namespace wc
+
+#endif // WORDCLOCK_H

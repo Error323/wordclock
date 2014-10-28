@@ -1,3 +1,6 @@
+#ifndef RINGBUFFER_H
+#define RINGBUFFER_H
+
 #include <stdint.h>
 
 template<typename T, uint8_t N=10>
@@ -35,3 +38,5 @@ private:
   uint8_t mPos;
   uint8_t mSize;
 };
+
+#endif // RINGBUFFER_H

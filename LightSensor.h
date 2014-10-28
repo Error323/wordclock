@@ -1,3 +1,6 @@
+#ifndef LIGHTSENSOR_H
+#define LIGHTSENSOR_H
+
 #include "RingBuffer.h"
 
 class LightSensor
@@ -17,3 +20,5 @@ private:
   RingBuffer<uint16_t, BUFFER_SIZE> mRingBuffer;
   uint8_t mPin;
 };
+
+#endif // LIGHTSENSOR_H
