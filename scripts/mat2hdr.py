@@ -3,6 +3,8 @@
 from generator import *
 import argparse
 
+DIR = {H: "HORIZONTAL", V: "VERTICAL", D:"DIAGONAL"}
+
 def get_configuration():
     """Returns a populated configuration"""
     parser = argparse.ArgumentParser(
@@ -29,7 +31,7 @@ def find(word, dirs, start, end, matrix):
                 else:
                     break
                 if len(indices) == length:
-                    return indices
+                    return indices, d
 
     raise ValueError("No indices found for ({}, {}, {}-{})".format(word, dirs, start, end))
 
@@ -67,23 +69,27 @@ if __name__ == "__main__":
     print mat2str(full)
     print " */\n"
 
-    m = max(W, key=len)
+    m = max(W + DIR.values(), key=len)
     output = ["0ul"] * SIZE*SIZE
     j = 0
     for T in ORDER:
         for w in T[0]:
-            I = find(WORDS[w], T[1], T[2][0], T[2][1], matrix)
+            I, d = find(WORDS[w], T[1], T[2][0], T[2][1], matrix)
             assert(len(I) == len(WORDS[w]))
             for i in I:
                 if output[i] != "0ul":
                     output[i] += "|" + WORDS[w]
                 else:
                     output[i] = WORDS[w]
+                output[i] += "|" + DIR[d]
             if j > 3 and WORDS[w] in ["VIJF","TIEN"]:
                 print "static const uint32_t %s_%s= (1ul << %i);" % (WORDS[w], ' ' * (len(m)-len(WORDS[w])) ,j)
             else:
                 print "static const uint32_t %s %s= (1ul << %i);" % (WORDS[w], ' ' * (len(m)-len(WORDS[w])) ,j)
             j += 1
+    for d in DIR.values():
+        print "static const uint32_t %s %s= (1ul << %i);" % (d, ' ' * (len(m)-len(d)), j)
+        j += 1
 
     s = ""
     for i,c in enumerate(output):

@@ -86,7 +86,7 @@ void ani_matrix(const uint32_t activated)
         // perform animation tick
         if (frame[j] >= start[j] + i && frame[j] < asize[j] + start[j] + i)
         {
-          if (frame[j] > start[j] + i && wc::wordclock[i*SIZE+j] & activated)
+          if (frame[j] > start[j] + i && wc::matrix[i*SIZE+j] & activated)
             led_matrix.setPixelColor(idx(i,j), color);
           else
           {
@@ -95,7 +95,7 @@ void ani_matrix(const uint32_t activated)
           }
         }
         // leave (prev)activated as is, turn rest off
-        else if ((wc::wordclock[i*SIZE+j] & (prev_activated|activated)) == 0ul)
+        else if ((wc::matrix[i*SIZE+j] & (prev_activated|activated)) == 0ul)
           led_matrix.setPixelColor(idx(i,j), 0);
       }
     }
