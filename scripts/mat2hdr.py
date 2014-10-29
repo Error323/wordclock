@@ -4,6 +4,7 @@ from generator import *
 import argparse
 
 DIR = {H: "HORIZONTAL", V: "VERTICAL", D:"DIAGONAL"}
+DIRINT = {H: 29, V: 30, D: 31}
 
 def get_configuration():
     """Returns a populated configuration"""
@@ -70,26 +71,23 @@ if __name__ == "__main__":
     print " */\n"
 
     m = max(W + DIR.values(), key=len)
-    output = ["0ul"] * SIZE*SIZE
+    output = [0] * SIZE*SIZE
     j = 0
     for T in ORDER:
         for w in T[0]:
             I, d = find(WORDS[w], T[1], T[2][0], T[2][1], matrix)
             assert(len(I) == len(WORDS[w]))
             for i in I:
-                if output[i] != "0ul":
-                    output[i] += "|" + WORDS[w]
-                else:
-                    output[i] = WORDS[w]
-                output[i] += "|" + DIR[d]
+                output[i] |= (1 << j)
+                output[i] |= (1 << DIRINT[d])
             if j > 3 and WORDS[w] in ["VIJF","TIEN"]:
                 print "static const uint32_t %s_%s= (1ul << %i);" % (WORDS[w], ' ' * (len(m)-len(WORDS[w])) ,j)
             else:
                 print "static const uint32_t %s %s= (1ul << %i);" % (WORDS[w], ' ' * (len(m)-len(WORDS[w])) ,j)
             j += 1
-    for d in DIR.values():
-        print "static const uint32_t %s %s= (1ul << %i);" % (d, ' ' * (len(m)-len(d)), j)
-        j += 1
+
+    for k,v in DIR.iteritems():
+        print "static const uint32_t %s %s= (1ul << %i);" % (v, ' ' * (len(m)-len(v)), DIRINT[k])
 
     s = ""
     for i,c in enumerate(output):

@@ -96,7 +96,7 @@ void ani_matrix(const uint32_t activated)
           }
         }
         // leave (prev)activated as is, turn rest off
-        else if ((wc::matrix[i*SIZE+j] & (prev_activated|activated)) == 0ul)
+        else if ((wc::matrix[i*SIZE+j] & (prev_activated|activated) & 0x7fffff) == 0ul)
           led_matrix.setPixelColor(idx(i,j), 0);
       }
     }
