@@ -43,7 +43,8 @@ float normal(const float x, float sigma_squared)
   return expf(-(x*x) / (2.0f * sigma_squared));
 }
 
-uint8_t idx(int i, int j)
+/** @brief invert uneven rows as our matrix is soldered as a strip */
+uint8_t idx(const uint8_t i, uint8_t j)
 {
   if (i % 2 == 1)
     j = SIZE - 1 - j;
