@@ -68,14 +68,17 @@ if __name__ == "__main__":
     print " */\n"
 
     m = max(W, key=len)
-    output = [0] * SIZE*SIZE
+    output = ["0ul"] * SIZE*SIZE
     j = 0
     for T in ORDER:
         for w in T[0]:
             I = find(WORDS[w], T[1], T[2][0], T[2][1], matrix)
             assert(len(I) == len(WORDS[w]))
             for i in I:
-                output[i] |= (1 << j)
+                if output[i] != "0ul":
+                    output[i] += "|" + WORDS[w]
+                else:
+                    output[i] = WORDS[w]
             if j > 3 and WORDS[w] in ["VIJF","TIEN"]:
                 print "static const uint32_t %s_%s= (1ul << %i);" % (WORDS[w], ' ' * (len(m)-len(WORDS[w])) ,j)
             else:
