@@ -4,5 +4,6 @@ ARDUINO_LIBS = Wire Adafruit_NeoPixel RTClib SPI
 ARDUINO_DIR = /home/fhuizing/Workspace/Arduino/arduino-1.5.8
 ARCHITECTURE = avr
 BOARD_SUB = atmega32u4
+CXXFLAGS_STD = -std=c++11
 
 include /home/fhuizing/Workspace/Arduino/Arduino-Makefile/Arduino.mk
