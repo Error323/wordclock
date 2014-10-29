@@ -11,11 +11,11 @@ public:
   /** @brief add new value to the ringbuffer */
   void Update();
 
-  /** @brief obtain brightness in range 0-255 */
+  /** @brief obtain brightness in range 1-255 */
   uint8_t Brightness();
 
 private:
-  static const uint8_t BUFFER_SIZE = 16;
+  static const uint8_t BUFFER_SIZE = 10;
 
   RingBuffer<uint16_t, BUFFER_SIZE> mRingBuffer;
   uint8_t mPin;
