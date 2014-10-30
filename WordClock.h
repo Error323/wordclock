@@ -11,9 +11,9 @@ namespace wc {
 
 /* Birthdays */
 static const DateTime bdays[] = { DateTime(2014, 3, 3),
-                                      DateTime(1991, 5, 15),
-                                      DateTime(1986, 5, 10),
-                                      DateTime(2010, 8, 22) };
+                                  DateTime(1991, 5, 15),
+                                  DateTime(1986, 5, 10),
+                                  DateTime(2005, 9, 4) };
 
 static const uint32_t bdays_idx[] = { PUCK, JANJELLE, MARLOES, FELICIA };
 static const uint32_t BIRTHDAYS = JANJELLE | MARLOES | PUCK | FELICIA;
