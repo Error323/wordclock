@@ -37,6 +37,18 @@ static LightSensor light_sensor(LIGHT_PIN);
 /** @brief the current time */
 static DateTime time;
 
+/** @brief animation variables */
+struct Line {
+  uint8_t speed;
+  uint8_t start;
+  uint8_t frame;
+  uint8_t asize;
+};
+
+static Line L[SIZE];
+static uint8_t done = 0;
+static uint8_t frame_time = 0;
+
 /** @brief compute normal distribution given s^2 and mu=0 */
 float normal(const float x, float sigma_squared)
 {
@@ -51,52 +63,42 @@ uint8_t idx(const uint8_t i, uint8_t j)
   return i*SIZE + j;
 }
 
-void ani_matrix(const uint32_t activated)
+void reset()
 {
-  static uint8_t speed[SIZE]; // speed in fps
-  static uint8_t start[SIZE]; // start time in frames
-  static uint8_t frame[SIZE]; // current frame
-  static uint8_t asize[SIZE]; // animation length
-  static uint8_t done = 0;
-  static uint8_t frame_time = 0;
-  static uint32_t prev_activated = 0ul;
-  static uint32_t tmp = 0ul;
+  for (uint8_t i = 0; i < SIZE; i++)
+  {
+    L[i].speed = random(1, 6);
+    L[i].start = random(0, 10);
+    L[i].asize = random(5, SIZE);
+    L[i].frame = 0;
+  }
+  done = 0;
+  frame_time = 0;
+}
+
+void ani_matrix(const uint32_t activated, const uint32_t previous)
+{
   uint8_t i, j, c;
 
-  if (activated != tmp)
-  {
-    for (i = 0; i < SIZE; i++)
-    {
-      speed[i] = random(1, 6);
-      start[i] = random(0, 10);
-      asize[i] = random(5, SIZE);
-      frame[i] = 0;
-    }
-    done = 0;
-    frame_time = 0;
-    prev_activated = tmp;
-    tmp = activated;
-  }
-
-  else if (done < SIZE)
+  if (done < SIZE)
   {
     for (i = 0; i < SIZE; i++)
     {
       for (j = 0; j < SIZE; j++)
       {
         // perform animation tick
-        if (frame[j] >= start[j] + i && frame[j] < asize[j] + start[j] + i)
+        if (L[j].frame >= L[j].start + i && L[j].frame < L[j].asize + L[j].start + i)
         {
-          if (frame[j] > start[j] + i && wc::matrix[i*SIZE+j] & activated)
+          if (L[j].frame > L[j].start + i && wc::matrix[i*SIZE+j] & activated)
             led_matrix.setPixelColor(idx(i,j), color);
           else
           {
-            c = round(normal(frame[j]-i-start[j], asize[j]-3) * 255);
+            c = round(normal(L[j].frame-i-L[j].start, L[j].asize-3) * 255);
             led_matrix.setPixelColor(idx(i,j), c, c, c);
           }
         }
         // leave (prev)activated as is, turn rest off
-        else if ((wc::matrix[i*SIZE+j] & (prev_activated|activated) & 0x7fffff) == 0ul)
+        else if ((wc::matrix[i*SIZE+j] & (previous|activated) & 0x7fffff) == 0ul)
           led_matrix.setPixelColor(idx(i,j), 0);
       }
     }
@@ -105,10 +107,10 @@ void ani_matrix(const uint32_t activated)
     done = 0;
     for (i = 0; i < SIZE; i++)
     {
-      if (frame[i] > asize[i] + start[i] + SIZE)
+      if (L[j].frame > L[j].asize + L[j].start + SIZE)
         done++;
-      if (frame_time % speed[i] == 0)
-        frame[i]++;
+      if (frame_time % L[j].speed == 0)
+        L[j].frame++;
     }
     frame_time++;
   }
@@ -136,17 +138,31 @@ void setup()
 
 void loop()
 {
-  uint32_t ms = millis();
+  static uint32_t ms;
+  static uint32_t activated = 0ul;
+  static uint32_t previous = 0ul;
+  static uint32_t tmp;
+
+  ms = millis();
   light_sensor.Update();
   time = rtc.now();
-  uint32_t activated = wc::time2words(time);
+  activated = wc::time2words(time);
 
-  ani_matrix(activated);
+  if (activated != tmp)
+  {
+    reset();
+    previous = tmp;
+    tmp = activated;
+  }
+  else
+  {
+    ani_matrix(activated, previous);
+  }
   
   led_matrix.setBrightness(light_sensor.Brightness());
   led_matrix.show();
   
-  int32_t waittime = (1000/FPS) - (millis() - ms);
+  int8_t waittime = (1000/FPS) - (millis() - ms);
   if (waittime > 0)
     delay(waittime);
 }
