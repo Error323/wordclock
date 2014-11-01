@@ -141,7 +141,7 @@ void loop()
   static uint32_t ms;
   static uint32_t activated = 0ul;
   static uint32_t previous = 0ul;
-  static uint32_t tmp;
+  static uint32_t tmp = 0ul;
 
   ms = millis();
   light_sensor.Update();
