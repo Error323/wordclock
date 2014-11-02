@@ -16,8 +16,6 @@
 
 /* Settings */
 #define LIGHT_PIN 0 // Light sensor pin
-#define B1_PIN    6 // Button 1 pin
-#define B2_PIN    8 // Button 2 pin
 #define LED_PIN   7 // Matrix led pin
 #define SIZE     10 // Matrix board size x size
 #define FPS      40 // Frames per second to achieve
@@ -107,10 +105,10 @@ void ani_matrix(const uint32_t activated, const uint32_t previous)
     done = 0;
     for (i = 0; i < SIZE; i++)
     {
-      if (L[j].frame > L[j].asize + L[j].start + SIZE)
+      if (L[i].frame > L[i].asize + L[i].start + SIZE)
         done++;
-      if (frame_time % L[j].speed == 0)
-        L[j].frame++;
+      if (frame_time % L[i].speed == 0)
+        L[i].frame++;
     }
     frame_time++;
   }
@@ -121,13 +119,6 @@ void setup()
   Wire.begin();
   rtc.begin();
   led_matrix.begin();
-  Serial.begin(9600);
-
-  pinMode(B1_PIN, INPUT);
-  pinMode(B2_PIN, INPUT);
-
-  digitalWrite(B1_PIN, LOW);
-  digitalWrite(B2_PIN, LOW);  
 
   if (!rtc.isrunning())
     rtc.adjust(DateTime(__DATE__, __TIME__));
