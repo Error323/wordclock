@@ -21,8 +21,6 @@
 #define FPS      40 // Frames per second to achieve
 
 /* Globals */
-static uint32_t color = Adafruit_NeoPixel::Color(200, 200, 200);
-
 /** @brief the hardware led matrix */
 static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 
@@ -88,12 +86,11 @@ void ani_matrix(const uint32_t activated, const uint32_t previous)
         if (L[j].frame >= L[j].start + i && L[j].frame < L[j].asize + L[j].start + i)
         {
           if (L[j].frame > L[j].start + i && wc::matrix[i*SIZE+j] & activated)
-            led_matrix.setPixelColor(idx(i,j), color);
+            c = 200;
           else
-          {
             c = round(normal(L[j].frame-i-L[j].start, L[j].asize-3) * 255);
-            led_matrix.setPixelColor(idx(i,j), c, c, c);
-          }
+
+          led_matrix.setPixelColor(idx(i,j), c, c, c);
         }
         // leave (prev)activated as is, turn rest off
         else if ((wc::matrix[i*SIZE+j] & (previous|activated) & 0x7fffff) == 0ul)
