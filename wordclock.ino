@@ -10,6 +10,8 @@
 #include <RTClib.h>
 #include <RTC_DS3231.h>
 #include <Adafruit_NeoPixel.h>
+#include <Time.h>
+#include <Timezone.h>
 
 #include "WordClock.h"
 #include "LightSensor.h"
@@ -27,11 +29,13 @@ static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 /** @brief the realtime clock */
 static RTC_DS3231 rtc;
 
+static TimeChangeRule summer_time = {"CEST", Last, Sat, Mar, 2, 120};
+static TimeChangeRule winter_time = {"CET", Last, Sat, Oct, 2, 60};
+static Timezone time_zone(summer_time, winter_time);
+time_t time;
+
 /** @brief the light sensor */
 static LightSensor light_sensor(LIGHT_PIN);
-
-/** @brief the current time */
-static DateTime time;
 
 /** @brief animation variables */
 struct Line {
@@ -117,11 +121,11 @@ void setup()
   rtc.begin();
   led_matrix.begin();
 
-  if (!rtc.isrunning())
-    rtc.adjust(DateTime(__DATE__, __TIME__));
+  // Adjust date and time to utc from compiletime, see Makefile
+  rtc.adjust(DateTime(__UTC__));
     
-  time = rtc.now();
-  randomSeed(time.unixtime());
+  // sync to Time
+  randomSeed(rtc.now().unixtime());
 }
 
 void loop()
@@ -133,8 +137,8 @@ void loop()
 
   ms = millis();
   light_sensor.Update();
-  time = rtc.now();
-  activated = wc::time2words(time);
+  time = time_zone.toLocal(rtc.now().unixtime());
+  activated = wc::time2words(DateTime(time));
 
   if (activated != tmp)
   {
