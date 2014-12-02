@@ -23,6 +23,34 @@
 #define FPS      40 // Frames per second to achieve
 
 /* Globals */
+/** @brief color */
+struct Color {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+};
+
+/** @brief earthtone colors
+ * http://www.creativecolorschemes.com/resources/free-color-schemes/earth-tone-color-scheme.shtml
+ */
+static Color colors[] = { { 73, 58, 41 },
+                          { 120, 109, 91 },
+                          { 169, 161, 140 },
+                          { 97, 51, 24 },
+                          { 133, 87, 35 },
+                          { 185, 156, 107 },
+                          { 143, 59, 27 },
+                          { 213, 117, 0 },
+                          { 219, 202, 105 },
+                          { 64, 79, 36 },
+                          { 102, 141, 60 },
+                          { 189, 208, 156 },
+                          { 78, 97, 114 },
+                          { 131, 146, 159 },
+                          { 163, 172, 184 } };
+
+static uint8_t color_index = random(0, 15);
+
 /** @brief the hardware led matrix */
 static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 
@@ -74,6 +102,7 @@ void reset()
   }
   done = 0;
   frame_time = 0;
+  color_index = random(0, 15);
 }
 
 void ani_matrix(const uint32_t activated, const uint32_t previous)
@@ -112,6 +141,22 @@ void ani_matrix(const uint32_t activated, const uint32_t previous)
         L[i].frame++;
     }
     frame_time++;
+  }
+  // birthday animation
+  else if (activated & wc::BIRTHDAYS)
+  {
+    Color &c = colors[color_index];
+    for (i = 0; i < SIZE; i++)
+    {
+      for (j = 0; j < SIZE; j++)
+      {
+        // change colors
+        if (wc::matrix[i*SIZE+j] & wc::BIRTHDAYS)
+        {
+          led_matrix.setPixelColor(idx(i,j), c.r, c.g, c.b);
+        }
+      }
+    }
   }
 }
 

@@ -41,6 +41,7 @@ static const uint32_t FELICIA    = (1ul << 22);
 static const uint32_t HORIZONTAL = (1ul << 29);
 static const uint32_t VERTICAL   = (1ul << 30);
 static const uint32_t DIAGONAL   = (1ul << 31);
+static const uint32_t BIRTHDAYS = PUCK | JANJELLE | MARLOES | FELICIA;
 
 static const uint32_t hours[] = { TWAALF, EEN,   TWEE, DRIE,  VIER,  VIJF_,
                                   ZES,    ZEVEN, ACHT, NEGEN, TIEN_, ELF };
