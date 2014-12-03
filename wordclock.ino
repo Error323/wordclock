@@ -147,16 +147,9 @@ void ani_matrix(const uint32_t activated, const uint32_t previous)
   {
     Color &c = colors[color_index];
     for (i = 0; i < SIZE; i++)
-    {
       for (j = 0; j < SIZE; j++)
-      {
-        // change colors
         if (wc::matrix[i*SIZE+j] & wc::BIRTHDAYS)
-        {
           led_matrix.setPixelColor(idx(i,j), c.r, c.g, c.b);
-        }
-      }
-    }
   }
 }
 
@@ -166,10 +159,13 @@ void setup()
   rtc.begin();
   led_matrix.begin();
 
-  // Adjust date and time to utc from compiletime, see Makefile
-  rtc.adjust(DateTime(__UTC__));
+  // Adjust date and time to utc from compiletime, see Makefile. Only perform
+  // when rtc is in an undefined state (i.e. battery was previously removed) or
+  // when compiletime is newer
+  if (!rtc.isrunning() || rtc.now().unixtime() < __UTC__)
+    rtc.adjust(DateTime(__UTC__));
     
-  // sync to Time
+  // Set seed on unix time
   randomSeed(rtc.now().unixtime());
 }
 
