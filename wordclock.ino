@@ -142,7 +142,7 @@ void ani_matrix(const uint32_t activated, const uint32_t previous)
     }
     frame_time++;
   }
-  // birthday animation
+  // show birthday name in a different color
   else if (activated & wc::BIRTHDAYS)
   {
     for (i = 0; i < SIZE; i++)
@@ -167,7 +167,8 @@ void setup()
   // Set seed on unix time
   randomSeed(rtc.now().unixtime());
 
-  // Enable all words for one sec each
+  // Enable all words as "bootsequence" speeding up time exponentially using
+  // pretty colors
   int d = 1000;
   for (int i = 0,x,y; i < sizeof(wc::words) / sizeof(uint32_t); i++)
   {
