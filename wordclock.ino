@@ -49,7 +49,7 @@ static Color colors[] = { { 73, 58, 41 },
                           { 131, 146, 159 },
                           { 163, 172, 184 } };
 
-static uint8_t color_index = random(0, 15);
+static Color color = colors[random(0,15)];
 
 /** @brief the hardware led matrix */
 static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
@@ -102,7 +102,7 @@ void reset()
   }
   done = 0;
   frame_time = 0;
-  color_index = random(0, 15);
+  color = colors[random(0, 15)];
 }
 
 void ani_matrix(const uint32_t activated, const uint32_t previous)
@@ -145,11 +145,10 @@ void ani_matrix(const uint32_t activated, const uint32_t previous)
   // birthday animation
   else if (activated & wc::BIRTHDAYS)
   {
-    Color &c = colors[color_index];
     for (i = 0; i < SIZE; i++)
       for (j = 0; j < SIZE; j++)
-        if (wc::matrix[i*SIZE+j] & wc::BIRTHDAYS)
-          led_matrix.setPixelColor(idx(i,j), c.r, c.g, c.b);
+        if (wc::matrix[i*SIZE+j] & (activated&wc::BIRTHDAYS))
+          led_matrix.setPixelColor(idx(i,j), color.r, color.g, color.b);
   }
 }
 
@@ -167,6 +166,23 @@ void setup()
     
   // Set seed on unix time
   randomSeed(rtc.now().unixtime());
+
+  // Enable all words for one sec each
+  int d = 1000;
+  for (int i = 0,x,y; i < sizeof(wc::words) / sizeof(uint32_t); i++)
+  {
+    for (y = 0; y < SIZE; y++)
+      for (x = 0; x < SIZE; x++)
+        if (wc::matrix[y*SIZE+x] & wc::words[i])
+          led_matrix.setPixelColor(idx(y,x), color.r, color.g, color.b);
+        else
+          led_matrix.setPixelColor(idx(y,x), 0, 0, 0);
+
+    led_matrix.show();
+    color = colors[i%15];
+    delay(d);
+    d /= 1.1;
+  }
 }
 
 void loop()

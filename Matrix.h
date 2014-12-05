@@ -46,6 +46,12 @@ static const uint32_t BIRTHDAYS = PUCK | JANJELLE | MARLOES | FELICIA;
 static const uint32_t hours[] = { TWAALF, EEN,   TWEE, DRIE,  VIER,  VIJF_,
                                   ZES,    ZEVEN, ACHT, NEGEN, TIEN_, ELF };
 
+static const uint32_t words[] = { VIJF,    TIEN,   KWART,  VOOR,  OVER,
+                                  HALF,    TWAALF, EEN,    TWEE,  DRIE,
+                                  VIER,    VIJF_,  ZES,    ZEVEN, ACHT,
+                                  NEGEN,   TIEN_,  ELF,    UUR,   JANJELLE,
+                                  MARLOES, PUCK,   FELICIA };
+
 static const uint32_t matrix[] = {
   536870916,  536870916,  536870916,  536870916,  536870918,  536870914,
   536870914,  536870914,  1077936128, 0,          0,          536870913,

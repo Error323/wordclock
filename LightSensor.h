@@ -17,7 +17,7 @@ public:
 private:
   static const uint8_t BUFFER_SIZE = 16;
   static const uint8_t MAX = 200;
-  static const uint8_t MIN = 10;
+  static const uint8_t MIN = 20;
 
   RingBuffer<uint16_t, BUFFER_SIZE> mRingBuffer;
   uint8_t mPin;
