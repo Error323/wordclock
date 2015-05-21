@@ -2,6 +2,7 @@
 #define RINGBUFFER_H
 
 #include <stdint.h>
+#include "fixedptc.h"
 
 template<typename T, uint8_t N>
 class RingBuffer
@@ -19,11 +20,11 @@ public:
 
   T Mean()
   {
-    float sum = 0.0f;
+    fixedpt sum = fixedpt_fromint(0);
     for (uint8_t i = 0; i < N; i++)
-      sum += mBuffer[i];
-    sum /= N;
-    return static_cast<T>(sum + 0.5f);
+      sum += fixedpt_fromint(mBuffer[i]);
+    sum = fixedpt_xdiv(sum, fixedpt_fromint(N));
+    return static_cast<T>(fixedpt_toint(sum + fixedpt_rconst(0.5)));
   }
 
 private:
