@@ -16,6 +16,6 @@ void LightSensor::Update()
 
 uint8_t LightSensor::Brightness()
 {
-  uint8_t brightness = map(mRingBuffer.Mean(), 0, 1023, 1, MAX);
-  return constrain(brightness, 1, MAX);
+  uint8_t brightness = map(mRingBuffer.Mean(), 0, 1023, MIN, MAX);
+  return constrain(brightness, MIN, MAX);
 }

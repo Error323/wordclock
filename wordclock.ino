@@ -10,6 +10,8 @@
 #include <RTClib.h>
 #include <RTC_DS3231.h>
 #include <Adafruit_NeoPixel.h>
+#include <Time.h>
+#include <Timezone.h>
 
 #include "WordClock.h"
 #include "LightSensor.h"
@@ -21,17 +23,47 @@
 #define FPS      40 // Frames per second to achieve
 
 /* Globals */
+/** @brief color */
+struct Color {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+};
+
+/** @brief earthtone colors
+ * http://www.creativecolorschemes.com/resources/free-color-schemes/earth-tone-color-scheme.shtml
+ */
+static Color colors[] = { { 73, 58, 41 },
+                          { 120, 109, 91 },
+                          { 169, 161, 140 },
+                          { 97, 51, 24 },
+                          { 133, 87, 35 },
+                          { 185, 156, 107 },
+                          { 143, 59, 27 },
+                          { 213, 117, 0 },
+                          { 219, 202, 105 },
+                          { 64, 79, 36 },
+                          { 102, 141, 60 },
+                          { 189, 208, 156 },
+                          { 78, 97, 114 },
+                          { 131, 146, 159 },
+                          { 163, 172, 184 } };
+
+static Color color = colors[random(0,15)];
+
 /** @brief the hardware led matrix */
 static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 
 /** @brief the realtime clock */
 static RTC_DS3231 rtc;
 
+static TimeChangeRule summer_time = {"CEST", Last, Sat, Mar, 2, 120};
+static TimeChangeRule winter_time = {"CET", Last, Sat, Oct, 2, 60};
+static Timezone time_zone(summer_time, winter_time);
+time_t time;
+
 /** @brief the light sensor */
 static LightSensor light_sensor(LIGHT_PIN);
-
-/** @brief the current time */
-static DateTime time;
 
 /** @brief animation variables */
 struct Line {
@@ -70,6 +102,7 @@ void reset()
   }
   done = 0;
   frame_time = 0;
+  color = colors[random(0, 15)];
 }
 
 void ani_matrix(const uint32_t activated, const uint32_t previous)
@@ -109,6 +142,14 @@ void ani_matrix(const uint32_t activated, const uint32_t previous)
     }
     frame_time++;
   }
+  // show birthday name in a different color
+  else if (activated & wc::BIRTHDAYS)
+  {
+    for (i = 0; i < SIZE; i++)
+      for (j = 0; j < SIZE; j++)
+        if (wc::matrix[i*SIZE+j] & (activated&wc::BIRTHDAYS))
+          led_matrix.setPixelColor(idx(i,j), color.r, color.g, color.b);
+  }
 }
 
 void setup()
@@ -117,11 +158,32 @@ void setup()
   rtc.begin();
   led_matrix.begin();
 
-  if (!rtc.isrunning())
-    rtc.adjust(DateTime(__DATE__, __TIME__));
+  // Adjust date and time to utc from compiletime, see Makefile. Only perform
+  // when rtc is in an undefined state (i.e. battery was previously removed) or
+  // when compiletime is newer
+  if (!rtc.isrunning() || rtc.now().unixtime() < __UTC__)
+    rtc.adjust(DateTime(__UTC__));
     
-  time = rtc.now();
-  randomSeed(time.unixtime());
+  // Set seed on unix time
+  randomSeed(rtc.now().unixtime());
+
+  // Enable all words as "bootsequence" speeding up time exponentially using
+  // pretty colors
+  int d = 1000;
+  for (int i = 0,x,y; i < sizeof(wc::words) / sizeof(uint32_t); i++)
+  {
+    for (y = 0; y < SIZE; y++)
+      for (x = 0; x < SIZE; x++)
+        if (wc::matrix[y*SIZE+x] & wc::words[i])
+          led_matrix.setPixelColor(idx(y,x), color.r, color.g, color.b);
+        else
+          led_matrix.setPixelColor(idx(y,x), 0, 0, 0);
+
+    led_matrix.show();
+    color = colors[i%15];
+    delay(d);
+    d /= 1.1;
+  }
 }
 
 void loop()
@@ -133,8 +195,8 @@ void loop()
 
   ms = millis();
   light_sensor.Update();
-  time = rtc.now();
-  activated = wc::time2words(time);
+  time = time_zone.toLocal(rtc.now().unixtime());
+  activated = wc::time2words(DateTime(time));
 
   if (activated != tmp)
   {
