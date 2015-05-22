@@ -409,4 +409,24 @@ fixedpt_pow(fixedpt n, fixedpt exp)
 	return (fixedpt_exp(fixedpt_mul(fixedpt_ln(n), exp)));
 }
 
+static inline fixedpt
+fixedpt_round(fixedpt x)
+{
+  x += fixedpt_rconst(0.5);
+  return x & ~FIXEDPT_FMASK;
+}
+
+static inline fixedpt
+fixedpt_floor(fixedpt x)
+{
+  return x & ~FIXEDPT_FMASK;
+}
+
+static inline fixedpt
+fixedpt_ceil(fixedpt x)
+{
+  x += fixedpt_fromint((fixedpt_fracpart(x) > 0));
+  return x & ~FIXEDPT_FMASK;
+}
+
 #endif
