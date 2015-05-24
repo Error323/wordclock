@@ -1,7 +1,7 @@
 #ifndef WORDCLOCK_H
 #define WORDCLOCK_H
 
-#include <RTClib.h>
+#include <Time.h>
 
 #define Activate(x) activated |= (x)
 
@@ -9,19 +9,16 @@ namespace wc {
 
 #include "Matrix.h"
 
-/* Birthdays */
-DateTime birthdays[] = { DateTime(2014, 3, 3), DateTime(1991, 5, 15),
-                         DateTime(1986, 5, 10), DateTime(2010, 8, 22) };
-
-uint32_t birthdays_indices[] = { PUCK, JANJELLE, MARLOES, FELICIA };
+static const uint32_t hours[] = { TWAALF, EEN,   TWEE, DRIE,  VIER,  VIJF_,
+                                  ZES,    ZEVEN, ACHT, NEGEN, TIEN_, ELF };
 
 /** @brief convert time to wordsmask */
-uint32_t time2words(const DateTime &time)
+uint32_t time2words()
 {
   uint32_t activated = 0ul;
   
-  uint8_t h = time.hour() % 12;
-  uint8_t m = (time.minute() + 2) / 5;
+  uint8_t h = hour() % 12;
+  uint8_t m = (minute() + 2) / 5;
 
   switch (m)
   {
@@ -50,7 +47,7 @@ uint32_t time2words(const DateTime &time)
 
   // check birthdays
   for (uint8_t i = 0; i < sizeof(birthdays_indices)/sizeof(uint32_t); i++)
-    if (time.month() == birthdays[i].month() && time.day() == birthdays[i].day())
+    if (month() == birthdays[i].month && day() == birthdays[i].day)
       Activate(birthdays_indices[i]);
 
   return activated;
