@@ -17,8 +17,9 @@ uint32_t time2words()
 {
   uint32_t activated = 0ul;
   
-  uint8_t h = hour() % 12;
-  uint8_t m = (minute() + 2) / 5;
+  time_t t = now();
+  uint8_t h = hour(t) % 12;
+  uint8_t m = (minute(t) + 2) / 5;
 
   switch (m)
   {
@@ -47,7 +48,7 @@ uint32_t time2words()
 
   // check birthdays
   for (uint8_t i = 0; i < sizeof(birthdays_indices)/sizeof(uint32_t); i++)
-    if (month() == birthdays[i].month && day() == birthdays[i].day)
+    if (month(t) == birthdays[i].month && day(t) == birthdays[i].day)
       Activate(birthdays_indices[i]);
 
   return activated;

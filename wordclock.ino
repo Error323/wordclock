@@ -23,6 +23,8 @@
 #define SIZE     10 // Matrix board size x size
 #define FPS      40 // Frames per second to achieve
 
+#define idx(i,j) ((i)*SIZE+(j))
+
 /* Globals */
 /** @brief color */
 struct Color {
@@ -61,12 +63,6 @@ static DCF77 dcf = DCF77(DCF_PIN, DCF_INT, true);
 /** @brief the light sensor */
 static LightSensor light_sensor(LIGHT_PIN);
 
-/** @brief invert uneven rows as our matrix is soldered as a strip */
-uint8_t idx(const uint8_t i, uint8_t j)
-{
-  return i*SIZE + j;
-}
-
 void reset()
 {
 }
@@ -82,9 +78,10 @@ void animate(const uint32_t activated, const uint32_t previous, const uint8_t br
         led_matrix.setPixelColor(idx(i,j), 0);
 }
 
-unsigned long getDCFTime()
+time_t getDCFTime()
 { 
-  return dcf.getTime();
+  time_t t = dcf.getTime();
+  return t;
 }
 
 void setup()
@@ -101,8 +98,8 @@ void setup()
   {
     led_matrix.setPixelColor(i, 0);
     i++;
-    i%=(SIZE*SIZE);
-    led_matrix.setPixelColor(i, 255);
+    i%=SIZE*SIZE;
+    led_matrix.setPixelColor(i, 0x02aa02);
     led_matrix.show();
     delay(1000);
   }
