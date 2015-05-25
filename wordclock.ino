@@ -58,7 +58,7 @@ static Color color;
 static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 
 /** @brief the radio clock */
-static DCF77 dcf = DCF77(DCF_PIN, DCF_INT, true);
+static DCF77 dcf = DCF77(DCF_PIN, DCF_INT);
 
 /** @brief the light sensor */
 static LightSensor light_sensor(LIGHT_PIN);
@@ -86,6 +86,12 @@ time_t getDCFTime()
 
 void setup()
 {
+  Serial.begin(9600);
+  Serial.println("1   - binary 1 corresponding to long pulse");
+  Serial.println("0   - binary 0 corresponding to short pulse");
+  Serial.println("BF  - Buffer is full at end of time-sequence. This is good");
+  Serial.println("EoB - Buffer is full before at end of time-sequence");
+  Serial.println("EoM - Buffer is not yet full at end of time-sequence");
   Wire.begin();
   led_matrix.begin();
   dcf.Start();
@@ -93,16 +99,12 @@ void setup()
   setSyncProvider(getDCFTime);
 
   // Wait for time update
-  uint8_t i = 0;
-  while (timeStatus() == timeNotSet)
-  {
+  for (uint8_t i = 0; i < SIZE*SIZE; i++)
     led_matrix.setPixelColor(i, 0);
-    i++;
-    i%=SIZE*SIZE;
-    led_matrix.setPixelColor(i, 0x02aa02);
-    led_matrix.show();
+  led_matrix.show();
+
+  while (timeStatus() == timeNotSet)
     delay(1000);
-  }
 
   // Set seed
   randomSeed(analogRead(LIGHT_PIN));
