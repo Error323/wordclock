@@ -6,62 +6,43 @@
  */
 
 #include <Wire.h>
-#include <Time.h>
-
-#include <DCF77.h>
 #include <Adafruit_NeoPixel.h>
+#include <dcf77.h>
 
 #include "fixedptc.h"
 #include "WordClock.h"
 #include "LightSensor.h"
+#include "Settings.h"
 
-/* Settings */
-#define LIGHT_PIN 0 // Light sensor pin
-#define LED_PIN   3 // Matrix led pin
-#define DCF_PIN   2 // Radio clock pin
-#define DCF_INT   0 // Radio clock interrupt
-#define SIZE     10 // Matrix board size x size
-#define FPS      40 // Frames per second to achieve
+using namespace DCF77_Encoder;
 
-#define idx(i,j) ((i)*SIZE+(j))
-
-/* Globals */
-/** @brief color */
-struct Color {
-  uint8_t r;
-  uint8_t g;
-  uint8_t b;
-};
-
-/** @brief earthtone colors
- * http://www.creativecolorschemes.com/resources/free-color-schemes/earth-tone-color-scheme.shtml
- */
-static Color colors[] = { { 73, 58, 41 },
-                          { 120, 109, 91 },
-                          { 169, 161, 140 },
-                          { 97, 51, 24 },
-                          { 133, 87, 35 },
-                          { 185, 156, 107 },
-                          { 143, 59, 27 },
-                          { 213, 117, 0 },
-                          { 219, 202, 105 },
-                          { 64, 79, 36 },
-                          { 102, 141, 60 },
-                          { 189, 208, 156 },
-                          { 78, 97, 114 },
-                          { 131, 146, 159 },
-                          { 163, 172, 184 } };
-
+/** @brief the color to use */
 static Color color;
 
 /** @brief the hardware led matrix */
 static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 
-/** @brief the radio clock */
-static DCF77 dcf = DCF77(DCF_PIN, DCF_INT);
-
 /** @brief the light sensor */
-static LightSensor light_sensor(LIGHT_PIN);
+static LightSensor light_sensor(LDR_PIN);
+
+/** @brief millisec counter */
+static volatile uint32_t msec = 0;
+static volatile uint32_t tsec = 0;
+
+static bool gframe_pending = false;
+uint8_t sample_dcf77_pin()
+{
+  msec++;
+  tsec++;
+  if (msec > 1000)
+  {
+    gframe_pending = true;
+    msec = 0;
+  }
+  uint8_t sample = digitalRead(DCF_PIN);
+  digitalWrite(DBG_PIN, sample);
+  return sample;
+}
 
 void reset()
 {
@@ -78,64 +59,82 @@ void animate(const uint32_t activated, const uint32_t previous, const uint8_t br
         led_matrix.setPixelColor(idx(i,j), 0);
 }
 
-time_t getDCFTime()
-{ 
-  time_t t = dcf.getTime();
-  return t;
-}
-
 void setup()
 {
-  Serial.begin(9600);
-  Serial.println("1   - binary 1 corresponding to long pulse");
-  Serial.println("0   - binary 0 corresponding to short pulse");
-  Serial.println("BF  - Buffer is full at end of time-sequence. This is good");
-  Serial.println("EoB - Buffer is full before at end of time-sequence");
-  Serial.println("EoM - Buffer is not yet full at end of time-sequence");
+  Serial.begin(115200);
   Wire.begin();
   led_matrix.begin();
-  dcf.Start();
-  setSyncInterval(30);
-  setSyncProvider(getDCFTime);
 
-  // Wait for time update
+  // Enable debug pin
+  pinMode(DBG_PIN, OUTPUT);
+
+  // Set seed
+  randomSeed(analogRead(LDR_PIN));
+
+  // Turn all leds off
   for (uint8_t i = 0; i < SIZE*SIZE; i++)
     led_matrix.setPixelColor(i, 0);
   led_matrix.show();
 
-  while (timeStatus() == timeNotSet)
-    delay(1000);
+  // Initialize dcf77 radio clock
+  DCF77_Clock::setup();
+  DCF77_Clock::set_input_provider(sample_dcf77_pin);
 
-  // Set seed
-  randomSeed(analogRead(LIGHT_PIN));
+  // Wait till clock is synced, depending on the signal quality this may take
+  // rather long. About 5 minutes with a good signal, 30 minutes or longer
+  // with a bad signal
+  for (uint8_t state = DCF77::useless;
+       state == DCF77::useless || state == DCF77::dirty;
+       state = DCF77_Clock::get_clock_state())
+  {
+  }
+  Serial.print("Synced in ");
+  Serial.print(tsec);
+  Serial.print(" ms");
 }
 
 void loop()
 {
-  static uint32_t ms;
   static uint32_t activated = 0ul;
   static uint32_t previous = 0ul;
   static uint32_t tmp = 0ul;
+  static DCF77_Clock::time_t now;
+  DCF77_Clock::get_current_time(now);
 
-  ms = millis();
   light_sensor.Update();
-  activated = wc::time2words();
+  activated = wc::time2words(now);
 
   if (activated != tmp)
   {
     reset();
     previous = tmp;
     tmp = activated;
-  }
-  else
-  {
     animate(activated, previous, light_sensor.Brightness());
+    led_matrix.show();
+
+    switch (DCF77_Clock::get_clock_state())
+    {
+    case DCF77::useless:
+      Serial.print(F("useless:  "));
+      break;
+    case DCF77::dirty:
+      Serial.print(F("dirty:    "));
+      break;
+    case DCF77::free:
+      Serial.print(F("free:     "));
+      break;
+    case DCF77::unlocked:
+      Serial.print(F("unlocked: "));
+      break;
+    case DCF77::locked:
+      Serial.print(F("locked:   "));
+      break;
+    case DCF77::synced:
+      Serial.print(F("synced:   "));
+      break;
+    }
+    DCF77_Clock::print(now);
+    Serial.println();
   }
-  
-  led_matrix.show();
-  
-  int8_t waittime = (1000/FPS) - (millis() - ms);
-  if (waittime > 0)
-    delay(waittime);
 }
 

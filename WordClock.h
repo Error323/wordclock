@@ -1,11 +1,12 @@
 #ifndef WORDCLOCK_H
 #define WORDCLOCK_H
 
-#include <Time.h>
+#include <dcf77.h>
 
 #define Activate(x) activated |= (x)
 
 namespace wc {
+using namespace DCF77_Encoder;
 
 #include "Matrix.h"
 
@@ -13,13 +14,12 @@ static const uint32_t hours[] = { TWAALF, EEN,   TWEE, DRIE,  VIER,  VIJF_,
                                   ZES,    ZEVEN, ACHT, NEGEN, TIEN_, ELF };
 
 /** @brief convert time to wordsmask */
-uint32_t time2words()
+uint32_t time2words(DCF77_Clock::time_t &t)
 {
   uint32_t activated = 0ul;
   
-  time_t t = now();
-  uint8_t h = hour(t) % 12;
-  uint8_t m = (minute(t) + 2) / 5;
+  uint8_t h = BCD::bcd_to_int(t.hour) % 12;
+  uint8_t m = (BCD::bcd_to_int(t.minute) + 2) / 5;
 
   switch (m)
   {
@@ -48,7 +48,7 @@ uint32_t time2words()
 
   // check birthdays
   for (uint8_t i = 0; i < sizeof(birthdays_indices)/sizeof(uint32_t); i++)
-    if (month(t) == birthdays[i].month && day(t) == birthdays[i].day)
+    if (BCD::bcd_to_int(t.month) == birthdays[i].month && BCD::bcd_to_int(t.day) == birthdays[i].day)
       Activate(birthdays_indices[i]);
 
   return activated;
