@@ -5,6 +5,7 @@
 #define DCF_PIN  2 // Radio clock pin
 #define SIZE    10 // Matrix board size x size
 #define FPS     40 // Frames per second to achieve
+#define ANI_TME 10 // Animation time in seconds
 
 #define idx(i,j) ((i)*SIZE+(j))
 

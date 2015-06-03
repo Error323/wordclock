@@ -26,15 +26,18 @@ static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 static LightSensor light_sensor(LDR_PIN);
 
 /** @brief millisec counter */
-static volatile uint32_t msec = 0;
-static volatile uint32_t tsec = 0;
-
+static uint32_t msec = 0;
+static uint32_t tsec = 0;
 static bool gframe_pending = false;
+
+/** @brief current time */
+static DCF77_Clock::time_t now;
+
 uint8_t sample_dcf77_pin()
 {
   msec++;
   tsec++;
-  if (msec > 1000)
+  if (msec > 1000/FPS)
   {
     gframe_pending = true;
     msec = 0;
@@ -83,11 +86,27 @@ void setup()
   // Wait till clock is synced, depending on the signal quality this may take
   // rather long. About 5 minutes with a good signal, 30 minutes or longer
   // with a bad signal
+  uint8_t counter = 0;
   for (uint8_t state = DCF77::useless;
        state == DCF77::useless || state == DCF77::dirty;
        state = DCF77_Clock::get_clock_state())
   {
+    // wait for next sec
+    DCF77_Clock::get_current_time(now);
+    Serial.print(state);
+    counter++;
+    if (counter >= 60) 
+    {   
+      Serial.print(" ");
+      Serial.print(DCF77_Second_Decoder::get_prediction_match());
+      Serial.println();
+      counter = 0;
+    }   
+    else
+    if (counter % 5 == 0)
+      Serial.print(" ");
   }
+
   Serial.print("Synced in ");
   Serial.print(tsec);
   Serial.print(" ms");
@@ -98,7 +117,6 @@ void loop()
   static uint32_t activated = 0ul;
   static uint32_t previous = 0ul;
   static uint32_t tmp = 0ul;
-  static DCF77_Clock::time_t now;
   DCF77_Clock::get_current_time(now);
 
   light_sensor.Update();
@@ -110,31 +128,6 @@ void loop()
     previous = tmp;
     tmp = activated;
     animate(activated, previous, light_sensor.Brightness());
-    led_matrix.show();
-
-    switch (DCF77_Clock::get_clock_state())
-    {
-    case DCF77::useless:
-      Serial.print(F("useless:  "));
-      break;
-    case DCF77::dirty:
-      Serial.print(F("dirty:    "));
-      break;
-    case DCF77::free:
-      Serial.print(F("free:     "));
-      break;
-    case DCF77::unlocked:
-      Serial.print(F("unlocked: "));
-      break;
-    case DCF77::locked:
-      Serial.print(F("locked:   "));
-      break;
-    case DCF77::synced:
-      Serial.print(F("synced:   "));
-      break;
-    }
-    DCF77_Clock::print(now);
-    Serial.println();
   }
 }
 
