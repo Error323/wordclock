@@ -16,6 +16,7 @@
  */
 
 #include <stdint.h>
+#include <avr/pgmspace.h>
 
 struct Date {
   uint8_t day;
@@ -46,7 +47,7 @@ static const uint32_t EN = (1ul << 20);
 static const uint32_t HAJO = (1ul << 21);
 static const uint32_t TROUWDAG = WYKE | EN | HAJO;
 
-static const uint32_t matrix[] = {
+static const PROGMEM uint32_t matrix[] = {
   0,       0,      0,      0,      0,      0,       0,       262144,  262144,
   262144,  0,      0,      0,      2112,   64,      64,      64,      64,
   64,      0,      0,      4096,   0,      2097152, 2097152, 2099200, 2097152,

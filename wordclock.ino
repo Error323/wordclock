@@ -7,6 +7,7 @@
 
 #include <Wire.h>
 #include <Adafruit_NeoPixel.h>
+#include <avr/pgmspace.h>
 //#include <dcf77.h>
 
 #include "fixedptc.h"
@@ -88,7 +89,8 @@ void clear(point_t &p, uint32_t activated)
       fixedpt pct_y = fixedpt_fromint(1) - fixedpt_abs(p.y - y);
       fixedpt pct = fixedpt_mul(pct_x, pct_y);
       int i = idx(fixedpt_toint(y), fixedpt_toint(x));
-      if (wc::matrix[i] & activated)
+      uint32_t w = pgm_read_dword(&wc::matrix[i]);
+      if (w & activated)
         continue;
       led_matrix.setPixelColor(i, 0ul);
     }
@@ -122,22 +124,24 @@ void animate(const uint32_t activated, const uint32_t previous, const uint8_t br
   n = m = 0;
 
   // 1. Determine sources and destinations
-  Serial.println("Determine");
   for (i = 0; i < SIZE; i++)
+  {
     for (j = 0; j < SIZE; j++)
-      if (wc::matrix[idx(i,j)] & previous)
+    {
+      uint32_t w = pgm_read_dword(&wc::matrix[idx(i,j)]);
+      if (w & previous)
         src[n++] = point_t{fixedpt_fromint(j), fixedpt_fromint(i)};
       else
-      if (wc::matrix[idx(i,j)] & activated)
+      if (w & activated)
         dst[m++] = point_t{fixedpt_fromint(j), fixedpt_fromint(i)};
+    }
+  }
 
   // 2. Shuffle sources for some randomness in animations
-  Serial.println("Shuffle");
   shuffle(src, n);
 
   // 3. Each source has one or more destinations or each destination one or
   // more sources
-  Serial.println("Equalize");
   if (n > m)
     for (i = m; i < n; i++)
       dst[i] = dst[random(m)];
@@ -146,7 +150,6 @@ void animate(const uint32_t activated, const uint32_t previous, const uint8_t br
       src[i] = src[random(n)];
 
   // 4. Compute some usefull stats
-  Serial.println("Stats");
   n = max(n, m);
   
   point_t p;
@@ -159,7 +162,6 @@ void animate(const uint32_t activated, const uint32_t previous, const uint8_t br
   }
 
   // 5. Animate
-  Serial.println("Animate");
   uint16_t frame = 0;
   while (frame < 3*FPS)
   {
