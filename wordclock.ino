@@ -252,9 +252,9 @@ void loop()
   {
     previous = tmp;
     tmp = activated;
-    animate(wc::TROUWDAG, previous, light_sensor.Brightness(), 3);
+    animate(wc::RING|wc::WYKE|wc::HAJO, previous, light_sensor.Brightness(), 3);
     //sparkle(wc::TROUWDAG, 4);
-    animate(activated, wc::TROUWDAG, light_sensor.Brightness(), 3);
+    animate(activated, wc::RING|wc::WYKE|wc::HAJO, light_sensor.Brightness(), 3);
   }
 }
 
