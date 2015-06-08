@@ -69,12 +69,17 @@
  */
 
 #ifndef FIXEDPT_BITS
-#define FIXEDPT_BITS	32
+#define FIXEDPT_BITS 16
 #endif
 
 #include <stdint.h>
 
-#if FIXEDPT_BITS == 32
+#if FIXEDPT_BITS == 16
+typedef int16_t fixedpt;
+typedef	int32_t	fixedptd;
+typedef	uint16_t fixedptu;
+typedef	uint32_t fixedptud;
+#elif FIXEDPT_BITS == 32
 typedef int32_t fixedpt;
 typedef	int64_t	fixedptd;
 typedef	uint32_t fixedptu;
@@ -85,11 +90,11 @@ typedef	__int128_t fixedptd;
 typedef	uint64_t fixedptu;
 typedef	__uint128_t fixedptud;
 #else
-#error "FIXEDPT_BITS must be equal to 32 or 64"
+#error "FIXEDPT_BITS must be equal to 16, 32 or 64"
 #endif
 
 #ifndef FIXEDPT_WBITS
-#define FIXEDPT_WBITS	24
+#define FIXEDPT_WBITS	8
 #endif
 
 #if FIXEDPT_WBITS >= FIXEDPT_BITS
@@ -167,7 +172,9 @@ fixedpt_str(fixedpt A, char *str, int max_dec)
 	const fixedptud mask = one - 1;
 
 	if (max_dec == -1)
-#if FIXEDPT_BITS == 32
+#if FIXEDPT_BITS == 16
+    max_dec = 2;
+#elif FIXEDPT_BITS == 32
 #if FIXEDPT_WBITS > 16
 		max_dec = 2;
 #else
@@ -369,7 +376,7 @@ fixedpt_ln(fixedpt x)
 	if (x < 0)
 		return (0);
 	if (x == 0)
-		return 0xffffffff;
+		return 0xffff;
 
 	log2 = 0;
 	xi = x;
