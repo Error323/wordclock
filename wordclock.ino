@@ -119,9 +119,9 @@ void plot_aa(point_t &p, uint8_t b)
 void animate(const uint32_t activated, const uint32_t previous,
              const uint8_t brightness, const uint8_t duration)
 {
-  point_t src[18];
-  point_t dst[18];
-  fixedpt spd[18];
+  point_t src[32];
+  point_t dst[32];
+  fixedpt spd[32];
   uint8_t n, m, i, j;
   n = m = 0;
 

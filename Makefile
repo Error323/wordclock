@@ -4,6 +4,6 @@ ARDUINO_LIBS = Wire Adafruit_NeoPixel dcf77
 ARDUINO_DIR = /home/fhuizing/Workspace/Arduino/arduino-1.7.3-linux64
 ARCHITECTURE = avr
 BOARD_SUB = atmega328p
-CXXFLAGS_STD = -std=c++11
+CXXFLAGS_STD = -std=c++11 -Wall -Wextra
 
 include /home/fhuizing/Workspace/Arduino/Arduino-Makefile/Arduino.mk

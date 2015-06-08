@@ -20,11 +20,11 @@ public:
 
   T Mean()
   {
-    fixedpt sum = fixedpt_fromint(0);
+    uint32_t sum = 0ul;
     for (uint8_t i = 0; i < N; i++)
-      sum += fixedpt_fromint(mBuffer[i]);
-    sum = fixedpt_div(sum, fixedpt_fromint(N));
-    return static_cast<T>(fixedpt_toint(fixedpt_round(sum)));
+      sum += mBuffer[i];
+    sum /= N;
+    return static_cast<T>(sum);
   }
 
 private:
