@@ -79,13 +79,15 @@ uint8_t idx(uint8_t i, uint8_t j)
 
 void clear(point_t &p, uint32_t activated)
 {
+  uint8_t i;
+  uint32_t w;
   for (fixedpt y = fixedpt_floor(p.y); y <= fixedpt_ceil(p.y); y += FIXEDPT_ONE)
   {
     for (fixedpt x = fixedpt_floor(p.x); x <= fixedpt_ceil(p.x);
          x += FIXEDPT_ONE)
     {
-      uint8_t i = idx(fixedpt_toint(y), fixedpt_toint(x));
-      uint32_t w = pgm_read_dword(&wc::matrix[i]);
+      i = idx(fixedpt_toint(y), fixedpt_toint(x));
+      w = pgm_read_dword(&wc::matrix[i]);
       if (w & activated)
         continue;
       led_matrix.setPixelColor(i, 0ul);
@@ -95,26 +97,27 @@ void clear(point_t &p, uint32_t activated)
 
 void plot_aa(point_t &p, uint8_t b)
 {
+  fixedpt pct_x, pct_y, pct;
+  uint8_t i;
+  uint32_t v;
   for (fixedpt y = fixedpt_floor(p.y); y <= fixedpt_ceil(p.y); y += FIXEDPT_ONE)
   {
     for (fixedpt x = fixedpt_floor(p.x); x <= fixedpt_ceil(p.x);
          x += FIXEDPT_ONE)
     {
-      fixedpt pct_x = FIXEDPT_ONE - fixedpt_abs(p.x - x);
-      fixedpt pct_y = FIXEDPT_ONE - fixedpt_abs(p.y - y);
-      fixedpt pct = fixedpt_mul(pct_x, pct_y);
-      uint8_t i = idx(fixedpt_toint(y), fixedpt_toint(x));
-      uint32_t v =
-          fixedpt_toint(fixedpt_round(fixedpt_mul(fixedpt_fromint(b), pct)));
+      pct_x = FIXEDPT_ONE - fixedpt_abs(p.x - x);
+      pct_y = FIXEDPT_ONE - fixedpt_abs(p.y - y);
+      pct = fixedpt_mul(pct_x, pct_y);
+      i = idx(fixedpt_toint(y), fixedpt_toint(x));
+      v = fixedpt_toint(fixedpt_round(fixedpt_mul(fixedpt_fromint(b), pct)));
       v = (v << 16 | v << 8 | v);
-      uint32_t u = led_matrix.getPixelColor(i);
-      led_matrix.setPixelColor(i, v | u);
+      led_matrix.setPixelColor(i, v | led_matrix.getPixelColor(i));
     }
   }
 }
 
 void animate(const uint32_t activated, const uint32_t previous,
-             const uint8_t brightness)
+             const uint8_t brightness, const uint8_t duration)
 {
   point_t src[18];
   point_t dst[18];
@@ -157,12 +160,12 @@ void animate(const uint32_t activated, const uint32_t previous,
     p = point_t{ dst[i].x - src[i].x, dst[i].y - src[i].y };
     dist = fixedpt_abs(p.x) + fixedpt_abs(p.y);
     spd[i] = fixedpt_div(
-        dist, fixedpt_fromint(random(fixedpt_toint(dist), 3 * FPS + 1)));
+        dist, fixedpt_fromint(random(fixedpt_toint(dist), duration * FPS + 1)));
   }
 
   // 5. Animate
   uint16_t frame = 0;
-  while (frame < 3 * FPS)
+  while (frame < duration * FPS)
   {
     if (gframe_pending)
     {
@@ -249,9 +252,9 @@ void loop()
   {
     previous = tmp;
     tmp = activated;
-    animate(wc::TROUWDAG, previous, light_sensor.Brightness());
-    // TODO: Sparkle 4 seconds
-    animate(activated, wc::TROUWDAG, light_sensor.Brightness());
+    animate(wc::TROUWDAG, previous, light_sensor.Brightness(), 3);
+    //sparkle(wc::TROUWDAG, 4);
+    animate(activated, wc::TROUWDAG, light_sensor.Brightness(), 3);
   }
 }
 
