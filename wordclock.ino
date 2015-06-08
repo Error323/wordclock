@@ -21,14 +21,13 @@ using namespace DCF77_Encoder;
 static Color color;
 
 /** @brief the hardware led matrix */
-static Adafruit_NeoPixel led_matrix(SIZE *SIZE, LED_PIN);
+static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 
 /** @brief the light sensor */
 static LightSensor light_sensor(LDR_PIN);
 
 /** @brief millisec counter */
-static volatile uint32_t msec = 0;
-static volatile uint32_t tsec = 0;
+static volatile uint16_t msec = 0;
 static volatile bool gframe_pending = false;
 
 /** @brief current time */
@@ -37,7 +36,6 @@ static DCF77_Clock::time_t now;
 uint8_t sample_dcf77_pin()
 {
   msec++;
-  tsec++;
   if (msec > 1000 / FPS)
   {
     gframe_pending = true;
@@ -71,7 +69,7 @@ template <typename T> fixedpt sign(T v)
   return fixedpt_fromint((v > 0) - (v < 0));
 }
 
-int idx(int i, int j)
+uint8_t idx(uint8_t i, uint8_t j)
 {
   if (i & 1)
     j = SIZE - j - 1;
@@ -86,7 +84,7 @@ void clear(point_t &p, uint32_t activated)
     for (fixedpt x = fixedpt_floor(p.x); x <= fixedpt_ceil(p.x);
          x += FIXEDPT_ONE)
     {
-      int i = idx(fixedpt_toint(y), fixedpt_toint(x));
+      uint8_t i = idx(fixedpt_toint(y), fixedpt_toint(x));
       uint32_t w = pgm_read_dword(&wc::matrix[i]);
       if (w & activated)
         continue;
@@ -105,7 +103,7 @@ void plot_aa(point_t &p, uint8_t b)
       fixedpt pct_x = FIXEDPT_ONE - fixedpt_abs(p.x - x);
       fixedpt pct_y = FIXEDPT_ONE - fixedpt_abs(p.y - y);
       fixedpt pct = fixedpt_mul(pct_x, pct_y);
-      int i = idx(fixedpt_toint(y), fixedpt_toint(x));
+      uint8_t i = idx(fixedpt_toint(y), fixedpt_toint(x));
       uint32_t v =
           fixedpt_toint(fixedpt_round(fixedpt_mul(fixedpt_fromint(b), pct)));
       v = (v << 16 | v << 8 | v);
@@ -221,24 +219,20 @@ void setup()
   {
     // wait for next sec
     DCF77_Clock::get_current_time(now);
-      Serial.print(state);
-      counter++;
-      if (counter >= 60)
-      {
-        Serial.print(F(" "));
-        Serial.print(DCF77_Second_Decoder::get_prediction_match());
-        Serial.println();
-        counter = 0;
-      }
-      else
-      if (counter % 5 == 0)
-        Serial.print(F(" "));
+    Serial.print(state);
+    counter++;
+    if (counter >= 60)
+    {
+      Serial.print(F(" "));
+      Serial.print(DCF77_Second_Decoder::get_prediction_match());
+      Serial.println();
+      counter = 0;
+    }
+    else
+    if (counter % 5 == 0)
+      Serial.print(F(" "));
   }
-
-  Serial.println("");
-  Serial.print(F("Synced in "));
-  Serial.print(tsec);
-  Serial.println(F(" ms"));
+  Serial.println();
 }
 
 void loop()
@@ -255,7 +249,9 @@ void loop()
   {
     previous = tmp;
     tmp = activated;
-    animate(activated, previous, light_sensor.Brightness());
+    animate(wc::TROUWDAG, previous, light_sensor.Brightness());
+    // TODO: Sparkle 4 seconds
+    animate(activated, wc::TROUWDAG, light_sensor.Brightness());
   }
 }
 
