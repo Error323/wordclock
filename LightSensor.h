@@ -15,7 +15,7 @@ public:
   uint8_t Brightness();
 
 private:
-  static const uint8_t BUFFER_SIZE = 16;
+  static const uint8_t BUFFER_SIZE = 3;
   static const uint8_t MAX = 200;
   static const uint8_t MIN = 20;
 
