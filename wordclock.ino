@@ -17,9 +17,6 @@
 
 using namespace DCF77_Encoder;
 
-/** @brief the color to use */
-static Color color;
-
 /** @brief the hardware led matrix */
 static Adafruit_NeoPixel led_matrix(SIZE*SIZE, LED_PIN);
 
@@ -116,7 +113,65 @@ void plot_aa(point_t &p, uint8_t b)
   }
 }
 
-void animate(const uint32_t activated, const uint32_t previous,
+void wait(const uint8_t duration)
+{
+  uint16_t frame = 0;
+  while (frame < duration*FPS)
+  {
+    if (gframe_pending)
+    {
+      gframe_pending = false;
+      frame++;
+    }
+  }
+}
+
+void ani_sparkle(const uint32_t activated, const uint8_t duration)
+{
+  uint8_t ids[32];
+  uint8_t start[32];
+  uint8_t n, i;
+
+  n = 0;
+  for (i = 0; i < SIZE*SIZE; i++)
+  {
+    uint32_t w = pgm_read_dword(&wc::matrix[i]);
+    // if activated and odds in our favor
+    if (w & activated && random(10) == 0)
+    {
+      ids[n] = i;
+      start[n] = random(duration*FPS - FPS);
+      n++;
+    }
+  }
+
+  uint16_t frame = 0;
+  uint32_t t, c, v;
+  fixedpt pct;
+  while (frame < duration * FPS)
+  {
+    if (gframe_pending)
+    {
+      gframe_pending = false;
+      for (i = 0; i < n; i++)
+      {
+        t = start[i] - frame;
+        if (t >= 0 && t < FPS)
+        {
+          pct = FIXEDPT_ONE - fixedpt_div(fixedpt_fromint(t), fixedpt_fromint(FPS));
+          v = fixedpt_toint(fixedpt_mul(pct, fixedpt_fromint(255)));
+          c = led_matrix.getPixelColor(ids[i]);
+          c |= (v<<16|v<<8|v);
+          led_matrix.setPixelColor(ids[i], c);
+        }
+      }
+      frame++;
+      led_matrix.show();
+    }
+  }
+}
+
+void ani_flow(const uint32_t activated, const uint32_t previous,
              const uint8_t brightness, const uint8_t duration)
 {
   point_t src[32];
@@ -172,8 +227,8 @@ void animate(const uint32_t activated, const uint32_t previous,
       gframe_pending = false;
       for (i = 0; i < n; i++)
       {
-        if (fixedpt_abs(src[i].x - dst[i].x) < spd[i] &&
-            fixedpt_abs(src[i].y - dst[i].y) < spd[i])
+        if (fixedpt_abs(src[i].x - dst[i].x) <= spd[i] &&
+            fixedpt_abs(src[i].y - dst[i].y) <= spd[i])
           continue;
 
         p = point_t{ dst[i].x - src[i].x, dst[i].y - src[i].y };
@@ -252,9 +307,10 @@ void loop()
   {
     previous = tmp;
     tmp = activated;
-    animate(wc::RING|wc::WYKE|wc::HAJO, previous, light_sensor.Brightness(), 3);
-    //sparkle(wc::TROUWDAG, 4);
-    animate(activated, wc::RING|wc::WYKE|wc::HAJO, light_sensor.Brightness(), 3);
+    ani_flow(wc::RING|wc::WYKE|wc::HAJO, previous, light_sensor.Brightness(), 3);
+    //ani_sparkle(wc::RING|wc::WYKE|wc::HAJO, 4);
+    wait(4);
+    ani_flow(activated, wc::RING|wc::WYKE|wc::HAJO, light_sensor.Brightness(), 3);
   }
 }
 
