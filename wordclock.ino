@@ -210,12 +210,14 @@ void ani_flow(const uint32_t activated, const uint32_t previous,
 
   point_t p;
   fixedpt dist;
+  int max_norm;
   for (i = 0; i < n; i++)
   {
     p = point_t{ dst[i].x - src[i].x, dst[i].y - src[i].y };
     dist = fixedpt_abs(p.x) + fixedpt_abs(p.y);
-    spd[i] = fixedpt_div(
-        dist, fixedpt_fromint(random(fixedpt_toint(dist), duration * FPS + 1)));
+    max_norm = random(fixedpt_toint(dist), duration*FPS) / fixedpt_toint(dist);
+    spd[i] = fixedpt_div(FIXEDPT_ONE, fixedpt_fromint(max_norm));
+    Serial.println(fixedpt_cstr(spd[i], 3));
   }
 
   // 5. Animate
@@ -244,6 +246,9 @@ void ani_flow(const uint32_t activated, const uint32_t previous,
         clear(src[i], activated);
     }
   }
+  for (i = 0; i < n; i++)
+    clear(src[i], activated);
+  led_matrix.show();
 }
 
 void setup()
@@ -266,6 +271,10 @@ void setup()
   // Initialize dcf77 radio clock
   DCF77_Clock::setup();
   DCF77_Clock::set_input_provider(sample_dcf77_pin);
+
+  ani_flow(wc::RING|wc::WYKE|wc::HAJO, wc::KWART|wc::VOOR|wc::VIER, 255, 3);
+  wait(4);
+  ani_flow(wc::TIEN|wc::VOOR|wc::VIER, wc::RING|wc::WYKE|wc::HAJO, 255, 3);
 
   // Wait till clock is synced, depending on the signal quality this may take
   // rather long. About 5 minutes with a good signal, 30 minutes or longer
