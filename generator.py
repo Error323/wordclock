@@ -4,6 +4,7 @@ import random
 import time
 import sys
 
+# xxx
 NUM_POOL      = 500   # Size of the chromosome pool
 NUM_PARENTS   = 15    # Parents that will mate
 NUM_RANDOM    = 3     # Random parents
